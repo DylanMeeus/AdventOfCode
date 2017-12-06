@@ -12,7 +12,6 @@ def getInput():
     f = open("input6.txt","r")
     strIn = f.read()
     strVal = strIn.split("\t")
-    print(strVal)
     return list(map(lambda k: int(k),strVal))
 
 
@@ -50,12 +49,26 @@ def solve():
             foundMatch = True
         store.append(registers)
     print(cycles)
-    
 
 
-
-
-
-
+def solve2():
+    registers = (getInput())
+    store = []
+    store.append(registers)
+    foundMatch = False
+    cycles = 0 
+    while not foundMatch:
+        ind = largestIndex(registers)
+        registers = redistribute(list(registers), ind) # new list to create a copy
+        cycles += 1
+        if registers in store:
+            "get distance to previous one!"
+            current = len(store) # Don't need to adapt for 0-index because it's not added yet
+            for i,e in reversed(list(enumerate(store))):
+                if e == registers:
+                    print(str(current - i))
+                    exit()
+        store.append(registers)
 
 solve()
+solve2()
