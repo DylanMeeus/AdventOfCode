@@ -10,7 +10,11 @@ class node:
         self.children = []
         self.parent = parent
         
-
+    def total_weight(self):
+        w = self.weight
+        for child in self.children:
+            w += child.total_weight()
+        return w
 
 
 def get_node(name,nodes):
@@ -21,6 +25,8 @@ def getInput():
     f = open("input7.txt",'r')
     lines = f.read()
     return lines.split("\n")
+
+
 
 
 
@@ -38,29 +44,25 @@ def solve2():
     axons = list(filter(lambda k: '->' in k, data))
     tree_root = build_tree(root,nodes,axons)
     r = tree_root
-    # dedup them
-    d = dedup(r,[])
-    leafs = list(filter(lambda k: len(k.children) == 0,d))
-    paths = []
-    for leaf in leafs:
-        parent = leaf.parent
-        rpaths = [leaf]
-        while parent != None:
-            rpaths.append(parent)
-            parent = parent.parent
-        paths.append(rpaths)
-    # find out which path is different at which point..
-    testroot = list(filter(lambda k: k.parent == None, d))
-    for p in paths:
-        print(sum_weights(p))
+   
+    print(r.total_weight())
+    find_wrong_weight(r)
+    exit()
 
 
-
-def sum_weights(path):
-    s = 0
-    for n in path:
-        s += n.weight
-    return s
+def find_wrong_weight(n):
+    if len(n.children) == 0:
+        return
+    mx = 0
+    mxn = n
+    for child in n.children:
+        ct = child.total_weight()
+        print(n.name + " :: " + child.name + ": " + str(ct))
+        if ct > mx:
+            mx = ct
+            mxn = child
+    print("=================")
+    find_wrong_weight(mxn)
 
 def dedup(n,p):
     p.append(n)
@@ -70,21 +72,16 @@ def dedup(n,p):
 
 
 def build_tree(n,nodes,axons):
-    # check if n is an axon
     for axon in axons:
         if axon.startswith(n.name):
-            parts = axon.split('->')[1].split(',')
-            last = n
-            if len(parts) > 0:
-                for part in parts:
-                    fn = get_node(part,nodes)
-                    fn = build_tree(fn, nodes, axons)
-                    fn.parent = last
-                    last.children.append(fn)
-                    last = fn
+            ps = axon.split('->')[1].split(',')
+            for p in ps:
+                pn = get_node(p,nodes)
+                pn = build_tree(pn,nodes,axons)
+                n.children.append(pn)
+                pn.parent=n
 
     return n
-
     
         
 def get_root():
