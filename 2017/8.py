@@ -34,6 +34,24 @@ def solve():
 
     print(max(varvalues.values()))
 
+def solve2():
+    data = getInput()
+    scan_variables(data)
+    # parse instructions with the variables
+    highest = 0
+    for line in data:
+        segments = line.split(' if ')
+        operation = segments[0]
+        predicate = segments[1]
+        p = parse_predicate(predicate)
+        if p:
+            parse_operation(operation)
+            temp_max = max(varvalues.values())
+            if temp_max > highest:
+                highest = temp_max
+
+    print(highest)
+
 
 def resolve_variable(variable):
     if variable in varvalues.keys():
@@ -90,3 +108,5 @@ compare_ops = {
         ">=":gre
         }
 solve()
+solve2()
+
