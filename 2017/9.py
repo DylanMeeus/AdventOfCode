@@ -26,6 +26,21 @@ def parse(data):
     return score
    
 
+# Each time you close, {, the score increments with the 'depth'
+def parse2(data):
+    removed_chars = 0
+    parsing_garbage = False
+    for character in data:
+        # guards, guards!
+        if parsing_garbage and not character == ">":
+            removed_chars += 1
+            continue
+
+        if character == "<":
+            parsing_garbage = True
+        elif character == ">":
+            parsing_garbage = False
+    return removed_chars 
 
 
 def sanitize(data):
@@ -53,5 +68,6 @@ def solve():
     data = getInput()
     score = parse(sanitize(data))
     print(score)
+    print(parse2(sanitize(data)))
 
 solve()
