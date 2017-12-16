@@ -2,8 +2,14 @@
 from collections import OrderedDict
 from functools import reduce
 import binascii
-def solve():
-    
+
+
+def solve2():
+    # collect the coordinates
+    # group the coordinates by scanning one by one, and removing from all coordinates when they are
+    # taken
+
+    print("hello world")
     hexbin = {
                 '0' : '0000',
                 '1' : '0001',
@@ -35,7 +41,50 @@ def solve():
     for val in values:
         out = reduce(lambda a, b : str(a) + str(b), map(lambda k: hexbin[k],val))
         bin_values.append(out)
-    #print(bin_values)
+    print(bin_values)
+    coordinates = []
+    for row in range(len(bin_values)):
+        for column in range(len(bin_values[row])):
+            if bin_values[row][column] == '1':
+                coordinates.append((row,column))
+    groups = []
+    while len(coordinates) > 0:
+        # take the first, and find all connections
+        first = coordinates[0]
+
+
+def solve():
+    hexbin = {
+                '0' : '0000',
+                '1' : '0001',
+                '2' : '0010',
+                '3' : '0011',
+                '4' : '0100',
+                '5' : '0101',
+                '6' : '0110',
+                '7' : '0111',
+                '8' : '1000',
+                '9' : '1001',
+                'a' : '1010',
+                'b' : '1011',
+                'c' : '1100',
+                'd' : '1101',
+                'e' : '1110',
+                'f' : '1111'
+            }
+
+    value = "hfdlxzhv"
+    values = []
+    for i in range(128):
+        value_ind = value+"-"+str(i)
+        values.append(value_ind)
+
+    values = list(map(lambda k: get_hash(k),values))
+
+    bin_values = []
+    for val in values:
+        out = reduce(lambda a, b : str(a) + str(b), map(lambda k: hexbin[k],val))
+        bin_values.append(out)
     ones = 0
     for bin_value in bin_values:
         x = len(list(filter(lambda k: k == '1', bin_value)))
@@ -96,4 +145,5 @@ def get_hash(data):
     return out
 
 
-solve()
+#solve()
+solve2()
