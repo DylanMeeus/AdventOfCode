@@ -41,16 +41,40 @@ def solve2():
     for val in values:
         out = reduce(lambda a, b : str(a) + str(b), map(lambda k: hexbin[k],val))
         bin_values.append(out)
-    print(bin_values)
     coordinates = []
     for row in range(len(bin_values)):
         for column in range(len(bin_values[row])):
             if bin_values[row][column] == '1':
                 coordinates.append((row,column))
     groups = []
-    while len(coordinates) > 0:
+    while len(coordinates) != 0:
         # take the first, and find all connections
-        first = coordinates[0]
+        print(len(coordinates))
+        node = coordinates[0]
+        group = find_connections(node, [node],coordinates)
+        groups.append(group)
+        coordinates = list(filter(lambda k: k not in group,coordinates)) 
+    print(len(groups))
+
+
+def find_connections(node, group,coordinates):
+    up = (node[0]-1,node[1])
+    down = (node[0]+1,node[1])
+    left = (node[0],node[1]-1)
+    right = (node[0],node[1]+1)
+    if up in coordinates and not up in group:
+        group.append(up)
+        group = find_connections(up,group,coordinates)
+    if down in coordinates and not down in group:
+        group.append(down)
+        group = find_connections(down,group,coordinates)
+    if left in coordinates and not left in group:
+        group.append(left)
+        group = find_connections(left,group,coordinates)
+    if right in coordinates and not right in group:
+        group.append(right)
+        group = find_connections(right,group,coordinates)
+    return group
 
 
 def solve():
