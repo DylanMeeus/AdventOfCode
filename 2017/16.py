@@ -1,5 +1,6 @@
 # solutions for day 16 of AoC
 from functools import reduce
+import copy
 
 def getInput():
     f = open("input16.txt",'r')
@@ -21,6 +22,33 @@ def solve():
     print(reduce(lambda a,b : str(a) + str(b),programs))
 
         
+
+
+def solve2():
+    method = {
+                "s" : spin,
+                "x" : exchange,
+                "p" : partner
+            }
+    programs = list("abcdefghijklmnop")
+    instructions = getInput()
+    init_state = copy.deepcopy(programs)
+    cycled = False
+    cycles = 0
+    while not cycled:
+        for instruction in instructions:
+            programs = method[instruction[0]](instruction,programs)
+        cycles += 1
+        if programs == init_state:
+            cycled = True
+            remaining_cycles = 1000000000 % cycles
+            print(remaining_cycles)
+            for i in range(remaining_cycles):
+                for instruction in instructions:
+                    programs = method[instruction[0]](instruction,programs)
+
+            
+    print(reduce(lambda a,b : str(a) + str(b),programs))
 
 
 
@@ -55,4 +83,4 @@ def partner(instruction, programs):
 
 
 
-solve()
+solve2()
