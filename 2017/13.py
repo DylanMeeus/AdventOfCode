@@ -1,5 +1,5 @@
 # Solution to day 13
-
+import copy
 class Scanner:
     
     def __init__(self):
@@ -14,7 +14,7 @@ class Scanner:
 
 def getInput():
     x = "0: 3\n1: 2\n4: 4\n6: 4"
-    return x.split("\n")
+    #return x.split("\n")
     f = open("input13.txt",'r')
     return f.read().split("\n")[:-1]
 
@@ -50,34 +50,29 @@ def solve():
 
 
 def solve2():
-    # Bruteforce it, because.. I can.
     data = getInput()
     # Create scanners
     scanners = create_scanners(data)
-    ninja = False
-    delay = 2 
-    while not ninja:
-        print("testing delay: " + str(delay))
-        scanners = create_scanners(data)
-        for scanner in scanners:
-            # determine position
-            dep = scanner.max_depth
-            if dep > 0:
-                if int((delay // dep-1)) % 2 == 0:
-                    scanner.depth = int(delay%dep) + 1 
-                else:
-                    scanner.depth = (scanner.max_depth - (int(delay%dep))) + 1
-        caught = False
-        for start in range(len(scanners)):
-            # find all the scanners 'start' moved on to, but exclude 0, also move the scanner
-            if scanners[start].depth == 1:
-                caught = True
-                continue
-            for scanner in scanners:
-                scanner.move()
-        # If found is still false, no scanner found us :-)
-        ninja = not caught
+    solution = False
+
+    delay = 0
+    while not solution:
+        # check if all positions are 1
+        can_pass = True
+        for pos in range(len(scanners)):
+            if scanners[pos].max_depth == 0:
+                scanners[pos].depth = -1
+            else: 
+                scanners[pos].depth = (delay + pos) % (2 * (scanners[pos].max_depth-1))
+
+            if scanners[pos].depth == 0:
+                can_pass = False
+
+        if can_pass:
+            print(delay)
+            exit()
         delay += 1
-    print(delay-1) 
+    print(delay) 
 #solve()
 solve2()
+
