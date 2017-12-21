@@ -41,6 +41,8 @@ class Program:
         self.line = 0
         self.terminated = False
         self.variables['p'] = pid
+        print(self.variables)
+        
         # Initialize commands 
         self.commands = {
                 'set' : self.set_value,
@@ -59,24 +61,25 @@ class Program:
     def exec_instruction(self):
         if self.on_hold or self.terminated:
             return
-        if self.line < (len(self.data)):
-            instruction = self.data[self.line]
-            parts = instruction.split(" ")
-            cmd = parts[0]
-            # Process possible jump
-            if cmd == "jgz":
-                if self.resolve(self.variables, parts[1]) > 0:
-                    self.line = self.line + self.resolve(self.variables, parts[2])
-                    return
-            # Process other instructions
-            else:
-                if len(parts) == 2:
-                    print(instruction)
-                    self.commands[cmd](parts[1])
-                elif len(parts) == 3:
-                    self.commands[cmd](parts[1],self.resolve(self.variables,parts[2]))
-            self.line += 1
+
+        instruction = self.data[self.line]
+        parts = instruction.split(" ")
+        cmd = parts[0]
+        # Process possible jump
+        if cmd == "jgz":
+            if self.resolve(self.variables, parts[1]) > 0:
+                self.line = self.line + self.resolve(self.variables, parts[2])
+                return
+        # Process other instructions
         else:
+            if len(parts) == 2:
+                print(instruction)
+                self.commands[cmd](parts[1])
+            elif len(parts) == 3:
+                self.commands[cmd](parts[1],self.resolve(self.variables,parts[2]))
+        self.line += 1
+        if self.line >= len(self.data):
+
             self.terminated = True
 
 
@@ -111,6 +114,7 @@ class Program:
         return int(possible_variable)
 
     def ping(self,value):
+
         self.buffer.append(value)
         self.on_hold = False
 
@@ -121,8 +125,8 @@ def solve2():
     one.OTHER = two
     two.OTHER = one
 
-    
-    while not one.terminated and not two.terminated:
+   
+    while (not one.terminated) and (not two.terminated):
         # Deadlock check
         if one.on_hold and two.on_hold:
             print("DEADLOCKED")
