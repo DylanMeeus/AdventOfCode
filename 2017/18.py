@@ -79,7 +79,6 @@ class Program:
                 self.commands[cmd](parts[1],self.resolve(self.variables,parts[2]))
         self.line += 1
         if self.line >= len(self.data):
-
             self.terminated = True
 
 
@@ -99,6 +98,7 @@ class Program:
     def rcv(self,variable):
         if len(self.buffer) == 0:
             self.on_hold= True
+            self.line = self.line - 1
         else:
             self.variables[variable] = self.buffer[0]
             self.buffer = self.buffer[1:]
@@ -114,7 +114,6 @@ class Program:
         return int(possible_variable)
 
     def ping(self,value):
-
         self.buffer.append(value)
         self.on_hold = False
 
