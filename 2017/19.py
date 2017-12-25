@@ -55,7 +55,7 @@ def solve():
             chain.append(char_at)
             print(chain)
 
-
+        
         if char_at == '+':
             # We have to change direction 
             move = find_connection(data,location,move)
@@ -63,10 +63,43 @@ def solve():
             
             
 
+
+def solve2():
+    data = getInput()
+
+    row = 0
+    column = 0
+    first_row = data[0]
+    for i in range(len(first_row)):
+        if first_row[i] == '|':
+            column = i
+            break
+
+    escaped = False
+    move = (1,0)    # tuple indicating x (row) + y (column) change
+    location = (0,column)
+    chain = []
+    total_steps = 1
+    while not escaped:
+        location = (location[0] + move[0], location[1] + move[1])
+        
+        char_at = data[location[0]][location[1]]
+        if char_at not in ['|','-','+',' ']:
+            chain.append(char_at)
+            print(chain)
+
+
+
+
+        total_steps += 1
+        if char_at == 'P':
+            print(total_steps)
+            exit()
+        if char_at == '+':
+            # We have to change direction 
+            move = find_connection(data,location,move)
+            #print(move)
+            
     
 
-
-
-    
-
-solve()
+solve2()
