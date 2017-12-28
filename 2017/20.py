@@ -8,6 +8,15 @@ class Vector:
         self.b = int(b)
         self.c = int(c)
 
+    def __eq__(self, other):
+        return isinstance(other, Vector) and (self.a == other.a and self.b == other.b and self.c == other.c)
+    
+    def __hash__(self):
+        return hash((self.a,self.b,self.c))
+
+    def __str__(self):
+        return "<" + str(self.a) + ", " + str(self.b) + ", " + str(self.c) + ">"
+
 class Particle:
     def __init__(self, position, velocity, acceleration):
         self.position = position
@@ -76,5 +85,44 @@ def solve():
     print(max_key)
 
 
+
+def filter_collisions(particles):
+    positions = list(map(lambda k: k.position,particles))
+    # Now count the occurances
+    position_occurances = {}
+    for position in positions:
+        occurances = len(list(filter(lambda k: k == position, positions)))
+        position_occurances[position] = occurances
+
+    new_particles = []
+    for particle in particles:
+        if position_occurances[particle.position] == 1:
+            new_particles.append(particle)
+    return new_particles
+    
+
+def solve2():
+    inp = getInput()
+    data = create_particles(inp)
+    # Calculate the distance for each particle. First determine if it is going further away or
+    # closer
+
+
+    for i in range(1000):
+        for particle in data:
+            # First add acceleration to velocity, then velocity to location
+            p = particle.position
+            a = particle.acceleration
+            v = particle.velocity
+            v.a += a.a
+            v.b += a.b
+            v.c += a.c
+            particle.velocity = v
+            p.a += v.a
+            p.b += v.b
+            p.c += v.c
+        data = filter_collisions(data)
+        print(len(data))
+
    
-solve()
+solve2()
