@@ -25,13 +25,55 @@ func main() {
 		}
 	}
 	fmt.Printf("%v\n", sum)
+	fmt.Printf("%v\n", notOverlapping(cs))
+}
+
+func hasOverlappingPoints(c1, c2 *claim, points map[claim][]point) bool {
+	for _,p1 := range points[*c1] {
+		for _,p2 := range points[*c2] {
+			if p1 == p2 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func notOverlapping(cs []claim) string {
+	claimPoints := make(map[claim][]point)
+	for _,c := range cs {
+		claimPoints[c] = pointsInClaim(c)
+	}
+	for _,c := range cs {
+		var overlaps bool = false
+		for _,o := range cs {
+			if c.id != o.id {
+				if hasOverlappingPoints(&c, &o, claimPoints) {
+					overlaps = true
+					continue
+				}
+			}
+		}
+		if !overlaps {
+			fmt.Println(c.id)
+		}
+	}
+	return ""
+}
+
+func pointsInClaim(c claim) []point {
+	points := []point{}
+	for column := c.x; column < c.x + c.w; column++ {
+		for row := c.y; row < c.y + c.h; row++ {
+			points = append(points, point{column, row})
+		}
+	}
+	return points
 }
 
 func overlaps(cs []claim) map[point]int {
 	pm := make(map[point]int, 0)
-	clms := make(map[string]int, 0)
 	for _,c := range cs {
-		clms[c.id]++
 		for column := c.x; column < c.x + c.w; column++ {
 			for row := c.y; row < c.y + c.h; row++ {
 				pm[point{column, row}]++
