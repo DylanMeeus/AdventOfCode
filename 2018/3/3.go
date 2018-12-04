@@ -84,7 +84,7 @@ func overlaps(cs []claim) map[point]int {
 }
 
 func claims() []claim {
-	b, err := ioutil.ReadFile(`C:\Development\Go\src\AoC\2018\3\input.txt`)
+	b, err := ioutil.ReadFile("input.txt")
 	if err != nil {
 		panic(err)
 	}
