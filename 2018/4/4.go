@@ -21,6 +21,7 @@ type stats struct {
 func main() {
     guardstats := parse(timesheet())
     fmt.Printf("%v\n", solve1(guardstats))
+    fmt.Printf("%v\n", solve2(guardstats))
 }
 
 func parse(input []string) map[string]*stats {
@@ -78,6 +79,33 @@ func solve1(gs map[string]*stats) int {
     id, _ := strconv.Atoi(sleepyGuard)
     fmt.Printf("%v at %v\n", id, maxM)
     return id * maxM 
+}
+
+func solve2(gs map[string]*stats) int {
+    // map of <ID> -> <Min, TimesAsleep>
+    m := make(map[string]map[int]int)
+    for guard, stat := range gs {
+        minrange := make(map[int]int)
+        for _, naptime := range stat.naptimes {
+            for i := naptime.sleep; i < naptime.wake; i++ {
+                minrange[i]++
+            }
+        }
+        m[guard] = minrange
+    }
+    var min, maxfreq int
+    var guard string
+    for k, r := range m {
+        for m, f := range r {
+            if f > maxfreq {
+                maxfreq = f
+                min = m
+                guard = k
+            }
+        }
+    }
+    id, _ := strconv.Atoi(guard)
+    return id * min
 }
 
 func minute(input string) int {
