@@ -6,8 +6,6 @@ def test(f, polymer):
 
 
 def react(polymer):
-    if polymer == "":
-        return ""
     res = reduce(lambda x, y:  x[:-1] if x[-1:] != y and x.lower()[-1:] == y.lower() else x + y, polymer)
     if len(res) == len(polymer):
         return res
