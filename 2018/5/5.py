@@ -1,5 +1,7 @@
 """ Solution to Advent Of Code 5 """
 from functools import reduce
+from string import ascii_lowercase
+import re
 
 def test(f, polymer):
     return f(polymer) == "dabCBAcaDA"
@@ -11,7 +13,18 @@ def react(polymer):
         return res
     return react(res)
 
+def find_shortest(polymer):
+    shortest = len(polymer)
+    for c in ascii_lowercase:
+        trimmed_polymer = re.sub("[{}{}]".format(c, c.upper()), "", polymer)
+        trimmed_len = len(react(trimmed_polymer))
+        if trimmed_len < shortest:
+            shortest = trimmed_len
+    return shortest
+
 
 if __name__ == '__main__':
     polymer = open('input.txt','r').read().replace("\n","")
-    print(len(react(polymer)))
+    #print(len(react(polymer)))
+    r = re.sub("[{}{}]".format("a","A"), "", "abBAa")
+    print(find_shortest(polymer))
