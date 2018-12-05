@@ -3,10 +3,6 @@ from functools import reduce
 from string import ascii_lowercase
 import re
 
-def test(f, polymer):
-    return f(polymer) == "dabCBAcaDA"
-
-
 def react(polymer):
     res = reduce(lambda x, y:  x[:-1] if x[-1:] != y and x.lower()[-1:] == y.lower() else x + y, polymer)
     if len(res) == len(polymer):
@@ -25,6 +21,5 @@ def find_shortest(polymer):
 
 if __name__ == '__main__':
     polymer = open('input.txt','r').read().replace("\n","")
-    #print(len(react(polymer)))
-    r = re.sub("[{}{}]".format("a","A"), "", "abBAa")
+    print(len(react(polymer)))
     print(find_shortest(polymer))
