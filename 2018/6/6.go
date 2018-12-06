@@ -19,7 +19,38 @@ func main() {
     l,t,r,b := boundingBox(ps)
     f := field(l,t,r,b)
     fmt.Printf("%v\n", solve(f,ps,l,t,r,b))
+    fmt.Printf("%v\n", solve2(ps, l,t,r,b))
 }
+
+func solve2(positions []*point, left, top, right, bottom int) int {
+    // we grow outside of our bounding box, because we know the max distance from it is 10.000
+    // we can use maxdistance (h) from top instead of bottom, due to connecting to all points
+    // and actually we can use the diff from top-bottom, but this is bruteforce anyway :)
+    maxdistance := 10000 
+    alterdistance := maxdistance 
+    left -= alterdistance
+    top -= alterdistance 
+    right += alterdistance
+    bottom += alterdistance
+    //field := field(left,top,right,bottom)
+    var size int
+    for i := left - maxdistance; i <= right + maxdistance; i++{
+        for j := top - maxdistance; j <= bottom + maxdistance; j++ {
+            var total int
+            for _, cor := range positions {
+                total += distance(&point{-1,j,i}, cor)
+                if total >= maxdistance {
+                   break  
+                }
+            }
+            if total < maxdistance {
+                size++
+            }
+        }
+    }
+    return size
+}
+
 
 func solve(field []*point, positions []*point, left, top , right, bottom int) int {
     // foreach point in the field, find the closest coordinate
@@ -103,7 +134,7 @@ func boundingBox(points []*point) (left,top,right,bottom int) {
 }
 
 func points() []*point{
-    bytes, _ := ioutil.ReadFile("test.txt")
+    bytes, _ := ioutil.ReadFile("input.txt")
     ps := make([]*point, 0)
     for i, part := range strings.Split(string(bytes), "\n") {
         if part == "" {
