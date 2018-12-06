@@ -27,12 +27,10 @@ func solve2(positions []*point, left, top, right, bottom int) int {
     // we can use maxdistance (h) from top instead of bottom, due to connecting to all points
     // and actually we can use the diff from top-bottom, but this is bruteforce anyway :)
     maxdistance := 10000 
-    alterdistance := maxdistance 
-    left -= alterdistance
-    top -= alterdistance 
-    right += alterdistance
-    bottom += alterdistance
-    //field := field(left,top,right,bottom)
+    left -= maxdistance 
+    top -= maxdistance 
+    right += maxdistance
+    bottom += maxdistance
     var size int
     for i := left - maxdistance; i <= right + maxdistance; i++{
         for j := top - maxdistance; j <= bottom + maxdistance; j++ {
