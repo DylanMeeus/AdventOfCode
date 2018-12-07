@@ -8,7 +8,6 @@ import (
     "math"
 )
 
-
 type point struct{
     id, x, y int
 }
@@ -51,7 +50,7 @@ func solve2(positions []*point, left, top, right, bottom int) int {
 }
 
 
-func solve(field []*point, positions []*point, left, top , right, bottom int) int {
+func solve(field []*point, positions []*point, left, top , right, bottom int) (max int) {
     // foreach point in the field, find the closest coordinate
     for _,point := range field {
         dist := 1000
@@ -74,7 +73,6 @@ func solve(field []*point, positions []*point, left, top , right, bottom int) in
         }
     }
     fmt.Printf("%v\n", count)
-    var max int
     for k, v := range count {
         if k == -1 {
             continue
@@ -83,7 +81,7 @@ func solve(field []*point, positions []*point, left, top , right, bottom int) in
             max = v
         }
     }
-    return max 
+    return max
 }
 
 func valid(p *point, field []*point, left, top, right, bottom int) bool {
