@@ -17,8 +17,8 @@ type point struct{
 func main() {
     ps := points()
     l,t,r,b := boundingBox(ps)
-    f := field(l,t,r,b)
-    fmt.Printf("%v\n", solve(f,ps,l,t,r,b))
+    //f := field(l,t,r,b)
+    //fmt.Printf("%v\n", solve(f,ps,l,t,r,b))
     fmt.Printf("%v\n", solve2(ps, l,t,r,b))
 }
 
@@ -27,13 +27,14 @@ func solve2(positions []*point, left, top, right, bottom int) int {
     // we can use maxdistance (h) from top instead of bottom, due to connecting to all points
     // and actually we can use the diff from top-bottom, but this is bruteforce anyway :)
     maxdistance := 10000 
-    left -= maxdistance 
-    top -= maxdistance 
-    right += maxdistance
-    bottom += maxdistance
+    cpos := len(positions)
+    left -= (maxdistance / cpos)
+    top -= maxdistance / cpos 
+    right += maxdistance / cpos
+    bottom += maxdistance / cpos
     var size int
-    for i := left - maxdistance; i <= right + maxdistance; i++{
-        for j := top - maxdistance; j <= bottom + maxdistance; j++ {
+    for i := left; i <= right; i++{
+        for j := top; j <= bottom; j++ {
             var total int
             for _, cor := range positions {
                 total += distance(&point{-1,j,i}, cor)
