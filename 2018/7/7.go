@@ -8,7 +8,7 @@ import (
 )
 
 type tree struct {
-    root []*node
+    nodes []*node
 }
 
 type node struct {
@@ -27,33 +27,41 @@ func findPath(tree *tree) string {
 
     // create a fake root
     previous = make([]*node,0)
-    fakeroot := &node{"-", tree.root, []*node{}}
-    path := findNext(fakeroot)
-
-    for _,p := range path {
+    findNext(tree.nodes)
+    for _,p := range previous {
         fmt.Printf("%v", p.id)
     }
     return ""
 }
 
-func findNext(current *node) ([]*node) {
-    if current.next == nil {
-        return append(previous, current)
-    }
-    if !contains(current,previous){
-        previous = append(previous, current)
-    }
-    // sort nodes, and visit in order of validity
-    sort.Slice(current.next, func(i, j int) bool {
-        return current.next[i].id < current.next[j].id 
+func findNext(sorted []*node) {
+    // sort nodes?
+    sort.Slice(sorted, func(i, j int) bool {
+        return sorted[i].id < sorted[j].id
     })
-    for _,n := range current.next {
+
+    if len(sorted) == 0 {
+        return
+    }
+    for _,n := range sorted {
         if valid(n.pre, previous) {
-            findNext(n)
+            previous = append(previous, n)
+            findNext(filter(sorted,n))
+            return 
         }
     }
-    return previous 
-}   
+    //findNext(sorted)
+}
+
+func filter(nodes []*node, target *node) []*node {
+    f := make([]*node,0)
+    for _,n := range nodes {
+        if n.id != target.id {
+            f = append(f, n)
+        }
+    }
+    return f
+}
 
 func valid(pre []*node, seen []*node) bool {
     for _,n := range pre {
@@ -97,6 +105,18 @@ func prereqs() *tree {
             currentNode.next = append(currentNode.next, nextNode)
         }
     }
+    // sort the nodemap and return them
+
+    keys := make([]string, 0)
+    for k,_ := range nodemap {
+        keys = append(keys, k)
+    }
+    sort.Strings(keys)
+    sortedNodes := make([]*node, 0)
+    for _,key := range keys {
+        sortedNodes = append(sortedNodes, nodemap[key])
+    }
+    return &tree{sortedNodes}
     /*
     for _,v := range nodemap {
         fmt.Println("prerequisites for: " + v.id)
@@ -109,7 +129,7 @@ func prereqs() *tree {
     }
     */
     // find the root (element without parent children)
-    return &tree{findRoot(nodemap)}
+    //return &tree{findRoot(nodemap)}
 }
 
 func findRoot(nodes map[string]*node) []*node {
