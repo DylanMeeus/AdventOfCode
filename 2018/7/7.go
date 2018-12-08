@@ -17,12 +17,83 @@ type node struct {
     pre []*node //prerequisites
 }
 
+var previous []*node
 func main() {
     tree := prereqs()
-    fmt.Println(findPath(tree))
+    //fmt.Println(findPath(tree))
+    solve2(tree)
 }
 
-var previous []*node
+type elf struct {
+    task *node
+    start int
+}
+var elves [2]*elf
+
+func waittime(n *node) int {
+    c := n.id[0]
+    return int(c) - 64
+}
+
+func solve2(t *tree) {
+    basetime := 0 
+    for i := range elves {
+        elves[i] = &elf{task: nil, start:0}
+    }
+    nodes := t.nodes
+    original := len(nodes)
+    previous = make([]*node, 0)
+    var second int
+    for len(previous) != original {
+        // perform cleanup
+        for _,e := range elves {
+            if e.task == nil {
+                continue
+            }
+            if e.start + basetime + waittime(e.task) == second {
+                previous = append(previous, e.task)
+                e.task = nil 
+                e.start = 0
+            }
+        }
+
+        // check if an elf is free
+        // assign work
+        // check if work is over
+        assignedDuringLoop := []*node{}
+        // resort them
+        sort.Slice(nodes, func(i, j int) bool {
+            return nodes[i].id < nodes[j].id
+        })
+        for _,n := range nodes {
+            if valid(n.pre, previous) && !contains(n, assignedDuringLoop) {
+                for _, e := range elves {
+                    if e.task == nil  && !contains(n, assignedDuringLoop){
+                        assignedDuringLoop = append(assignedDuringLoop,n)
+                        e.task = n
+                        e.start = second
+                    }
+                }
+            }
+        }
+        for _,n := range assignedDuringLoop {
+            nodes = filter(nodes, n)
+        }
+        second++
+    }
+
+    fmt.Println(second-1) // the last worked second the work was actually done :)
+
+    // print solution
+   /* for _,n := range previous {
+        fmt.Printf("%v", n.id)
+    }*/
+}
+
+func findTime() {
+
+}
+
 func findPath(tree *tree) string {
 
     // create a fake root
@@ -74,7 +145,6 @@ func valid(pre []*node, seen []*node) bool {
 
 func contains(n *node, nodes []*node) bool {
     for _,o := range nodes {
-
         if n.id == o.id {
             return true
         }
