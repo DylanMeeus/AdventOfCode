@@ -7,6 +7,14 @@ import (
     "sort"
 )
 
+var previous []*node
+var elves [5]*elf
+
+type elf struct {
+    task *node
+    start int
+}
+
 type tree struct {
     nodes []*node
 }
@@ -14,29 +22,23 @@ type tree struct {
 type node struct {
     id string
     next []*node
-    pre []*node //prerequisites
+    pre []*node 
 }
 
-var previous []*node
 func main() {
     tree := prereqs()
-    //fmt.Println(findPath(tree))
-    solve2(tree)
+    fmt.Println(findPath(tree))
+    fmt.Println(solve2(tree))
 }
 
-type elf struct {
-    task *node
-    start int
-}
-var elves [2]*elf
 
 func waittime(n *node) int {
     c := n.id[0]
     return int(c) - 64
 }
 
-func solve2(t *tree) {
-    basetime := 0 
+func solve2(t *tree) int {
+    basetime := 60 
     for i := range elves {
         elves[i] = &elf{task: nil, start:0}
     }
@@ -82,16 +84,7 @@ func solve2(t *tree) {
         second++
     }
 
-    fmt.Println(second-1) // the last worked second the work was actually done :)
-
-    // print solution
-   /* for _,n := range previous {
-        fmt.Printf("%v", n.id)
-    }*/
-}
-
-func findTime() {
-
+    return second-1 // the last worked second the work was actually done :)
 }
 
 func findPath(tree *tree) string {
@@ -99,10 +92,11 @@ func findPath(tree *tree) string {
     // create a fake root
     previous = make([]*node,0)
     findNext(tree.nodes)
+    var out string
     for _,p := range previous {
-        fmt.Printf("%v", p.id)
+        out += p.id
     }
-    return ""
+    return out
 }
 
 func findNext(sorted []*node) {
@@ -121,7 +115,6 @@ func findNext(sorted []*node) {
             return 
         }
     }
-    //findNext(sorted)
 }
 
 func filter(nodes []*node, target *node) []*node {
@@ -187,38 +180,4 @@ func prereqs() *tree {
         sortedNodes = append(sortedNodes, nodemap[key])
     }
     return &tree{sortedNodes}
-    /*
-    for _,v := range nodemap {
-        fmt.Println("prerequisites for: " + v.id)
-        for _,n := range v.pre {
-            if n == nil {
-                continue
-            }
-            fmt.Printf("%v\n", n.id)
-        }
-    }
-    */
-    // find the root (element without parent children)
-    //return &tree{findRoot(nodemap)}
-}
-
-func findRoot(nodes map[string]*node) []*node {
-    seen := make(map[string]bool, len(nodes))
-    for _,v := range nodes {
-        for _,c := range v.next {
-            seen[c.id] = true
-        }
-    }
-    possibleRoots := []string{}
-    for k,_ := range nodes {
-        if seen[k] == false {
-            possibleRoots = append(possibleRoots,k)
-        }
-    }
-    sort.Strings(possibleRoots)
-    rootnodes := []*node{}
-    for _,s := range possibleRoots {
-        rootnodes = append(rootnodes, nodes[s])
-    }
-    return rootnodes 
 }
