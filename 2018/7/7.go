@@ -31,7 +31,6 @@ func main() {
     fmt.Println(solve2(tree))
 }
 
-
 func waittime(n *node) int {
     c := n.id[0]
     return int(c) - 64
@@ -83,16 +82,12 @@ func solve2(t *tree) int {
         }
         second++
     }
-
     return second-1 // the last worked second the work was actually done :)
 }
 
-func findPath(tree *tree) string {
-
-    // create a fake root
+func findPath(tree *tree) (out string) {
     previous = make([]*node,0)
     findNext(tree.nodes)
-    var out string
     for _,p := range previous {
         out += p.id
     }
@@ -100,7 +95,6 @@ func findPath(tree *tree) string {
 }
 
 func findNext(sorted []*node) {
-    // sort nodes?
     sort.Slice(sorted, func(i, j int) bool {
         return sorted[i].id < sorted[j].id
     })
@@ -169,7 +163,6 @@ func prereqs() *tree {
         }
     }
     // sort the nodemap and return them
-
     keys := make([]string, 0)
     for k,_ := range nodemap {
         keys = append(keys, k)
