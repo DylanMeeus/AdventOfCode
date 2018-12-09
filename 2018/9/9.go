@@ -5,11 +5,11 @@ import (
     "strconv"
 )
 
-// make a double-linked list
+// make a doubly-linked list
 // figure out the insertion algorithm
 
 
-// double linked list
+// doubly linked list
 type list struct {
     start *node
     size int
@@ -26,11 +26,19 @@ func main(){
     l.add(0)
     l.add(1)
     l.add(2)
-    l.addAt(3,1)
+    l.addAt(3,3)
     fmt.Printf("%v\n",l)
 }
 
 func (l *list) addAt(value, position int) {
+    if position == 0 {
+        l.addHead(value)
+        return
+    } 
+    if position == l.size {
+        l.add(value)
+        return
+    }
     toReplace := l.start
     for i := 0; i < position; i++ {
         toReplace = toReplace.next
@@ -38,6 +46,13 @@ func (l *list) addAt(value, position int) {
     // now we have the node where we want to insert
     n := &node{value, toReplace.prev, toReplace}
     toReplace.prev.next = n
+    l.size++
+}
+
+func (l *list) addHead(value int) {
+    // push everything and add the head
+    n := &node{value, l.start.prev, l.start}
+    l.start = n
     l.size++
 }
 
