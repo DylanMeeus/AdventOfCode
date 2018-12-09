@@ -13,8 +13,8 @@ type node struct {
 }
 
 func main(){
-    fmt.Println("starting")
     fmt.Printf("%v\n", solve(parse()))
+    fmt.Printf("%v\n", solve2(parse()))
 }
 
 func solve(n *node) int {
@@ -28,6 +28,29 @@ func solve(n *node) int {
     return sum
 }
 
+func solve2(n *node) int {
+    var sum int
+    if len(n.children) == 0 {
+        for _,m := range n.metadata {
+            sum += m
+        }
+    } else {
+        for _,m := range n.metadata {
+            child := n.childAt(m-1)
+            if child != nil && m != 0{
+                sum += solve2(n.childAt(m-1))
+            }
+        }
+    }
+    return sum
+}
+
+func (n node) childAt(i int) *node {
+    if i < 0 || i >= len(n.children) {
+        return nil
+    }
+    return n.children[i]
+}
 
 
 func parse() *node {
