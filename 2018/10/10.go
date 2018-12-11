@@ -1,7 +1,6 @@
 package main
 
 import( 
-    "fmt"
     "math"
     "io/ioutil"
     "strings"
@@ -21,27 +20,14 @@ type star struct {
     position, velocity *point
 }
 
-
-var palette = []color.Color{color.Black, color.RGBA{0x00,0xff,0x00,0xff}}
+var palette = []color.Color{color.Black, color.RGBA{0xff,0xff,0x00,0xff}}
 func main() {
-    fmt.Println("starting..")
-    sts := stars()
-    draw(sts)
+    draw(stars())
 }
 
-func solve() {
-    // find the string it makes
-
-}
-
-
-// are the stars alligned? :D
 func starsAlligned(stars []*star) int {
-    //xs should all appear more than once?
-    ys := make(map[int]int, 0)
     var distance int
     for _,s := range stars {
-        ys[s.position.y]++
         for _,o := range stars {
             if s == o {
                 continue
@@ -51,14 +37,6 @@ func starsAlligned(stars []*star) int {
         }
     }
     return distance
-    //fmt.Printf("%v\n", ys)
-    /*
-    for _,v := range ys {
-        if v == 1 {
-            //return false
-        }
-    }*/
-    //return true
 }
 
 func draw(stars []*star) {
@@ -93,7 +71,6 @@ func draw(stars []*star) {
 }
 
 func (s *star) move() {
-    // apply the velocity to the star
     s.position.x += s.velocity.x
     s.position.y += s.velocity.y
 }
@@ -108,7 +85,6 @@ func stars() []*star {
     if err != nil {
         panic(err)
     }
-
     sts := make([]*star, 0)
     for _,parts := range strings.Split(string(bytes), "\n") {
         if parts == "" {
