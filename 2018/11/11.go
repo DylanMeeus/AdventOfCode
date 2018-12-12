@@ -12,12 +12,83 @@ type cell struct {
 }
 
 func main() {
-    lvl, cell := solve()
-    fmt.Printf("%v starting at: %v\n", lvl, cell)
+    //lvl, cell := solve()
+    //fmt.Printf("%v starting at: %v\n", lvl, cell)
+    solve2()
+}
+
+
+func solve2() {
+    // make a map of point -> value?
+    cloud := pointCloud()
+    type result struct {
+        x,y,dial,lvl int
+    }
+
+    results := make(chan result)
+
+    maxdial := 300 
+    for dial := 2; dial < maxdial; dial++ {
+        // make clusters of different sizes
+        go func(dial int) {
+            fmt.Println(dial)
+            var x,y,max int
+            for i := 0; i < 300-dial; i++ {
+                for j := 0; j< 300-dial; j++ {
+                    lvl := clusterPower(&cell{i,j}, cloud, dial)
+                    if lvl > max {
+                        max = lvl
+                        x = i
+                        y = j
+                    }
+                }
+            }
+            results <- result{x,y,dial,max}
+        }(dial)
+    }
+
+    ress := make([]result, 298)
+    for x := 2; x < maxdial; x++ {
+        res := <-results
+        fmt.Printf("dial %v max %v, result: %v\n", res.dial, res.lvl, res)
+        ress = append(ress, res)
+    }
+
+
+    var bestresult result
+    for _,r := range ress {
+        if r.lvl > bestresult.lvl {
+            bestresult = r
+        }
+    }
+    fmt.Printf("dial %v max %v, result: %v\n", bestresult.dial, bestresult.lvl, bestresult)
+}
+
+func clusterPower(start *cell, cells map[cell]int, dial int) int {
+    var pow int
+    for i := 0; i < dial; i++ {
+        for j := 0; j < dial; j++ {
+            pow += cells[cell{start.x + i, start.y + j}]
+        }
+    }
+    return pow
+}
+
+
+
+func pointCloud() (map[cell]int) {
+    cloud := make(map[cell]int,0)
+    for i := 0; i < 300; i++ {
+        for j := 0; j < 300; j++ {
+            c := cell{i,j}
+            powlvl := power(&c)
+            cloud[c] = powlvl
+        }
+    }
+    return cloud 
 }
 
 func solve() (int, *cell) {
-    
     cells := make([][]*cell, 0)
     powers := make(map[cell]int)
     for i := 0; i < 297; i++ {
