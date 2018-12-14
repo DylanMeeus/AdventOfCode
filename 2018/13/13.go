@@ -31,8 +31,65 @@ type junction struct {
 
 
 func main() {
-    fmt.Printf("%v\n", solve(parse()))
+    fmt.Printf("%v\n", solve2(parse()))
 }
+
+func solve2(atlas map[point]string, cars []*car) *point {
+    aliveness := make(map[*car]bool)
+    for _,c := range cars {
+        aliveness[c] = true
+    }
+
+    for {
+        carpos := make(map[point]*car)
+        pts := make([]*point,0)
+        for _,c := range cars {
+            if aliveness[c] {
+                pts = append(pts, c.position)
+                carpos[*c.position] = c
+            }
+        }
+        sort.Slice(pts, func(i, j int) bool {
+            return pts[i].y < pts[j].y
+        })
+        sort.Slice(pts, func(i, j int) bool {
+            return pts[i].x < pts[j].x
+        })
+        for _,p := range pts {
+            c := carpos[*p]
+            if !aliveness[c]{
+                continue
+            }
+            c.move(atlas)
+            // check the collision
+            for _,o := range cars {
+                if c != o && aliveness[c] && aliveness[o]{
+                    if (*c.position) == (*o.position) {
+                        aliveness[c] = false
+                        aliveness[o] = false
+                        if amount, cs := aliveCars(aliveness); amount == 1 {
+           //                 cs[0].move(atlas)
+                            return cs[0].position
+                        } 
+                    }
+                }
+            }
+        }
+    }
+    return nil
+}
+
+func aliveCars(in map[*car]bool) (int, []*car) {
+    cars := make([]*car, 0)
+    for k, v := range in {
+        if v {
+            cars = append(cars, k)
+        }
+    }
+    fmt.Printf("%v\n", len(cars))
+    return len(cars), cars
+}
+
 
 func solve(atlas map[point]string, cars []*car) *point {
     for {
