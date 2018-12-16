@@ -45,13 +45,12 @@
   (let* ((x (nth fst input))
         (y (nth snd input))
         (sm (digits (+ x y)))
-        (index (contains (if (< (list-length input) 20)
-                           (reverse input)
-                           (subseq (reverse input) 0 10)) (reverse *lookup*) 0))
-        )
+        (index (if (= (mod (list-length input) 100000) 0)
+                 (contains (reverse input) (reverse *lookup*) 0)
+                  -1)))
   (setf input (append input sm))
   (setf recipes (+ recipes (list-length sm)))
-  (print recipes)
+  ;(print recipes)
 
   ; check for containing substring
   (if (= index -1)
@@ -62,6 +61,7 @@
 ; return index of needle in list
 (defun contains(lst needle index) 
     (let ((len (list-length needle)))
+      (print "checking")
       (if (or (eq lst nil) (< (list-length lst) len))
         -1
         (progn
@@ -76,5 +76,5 @@
 ; (generate '(3 7) 2 0 1)
 ; solve part 2
 (defun main()
-    (solve2 '(3 7) 2 0 1))
-
+    (solve2 '(3 7) 2 0 1)
+)
