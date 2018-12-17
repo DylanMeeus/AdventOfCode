@@ -19,27 +19,37 @@ var wall = "#"
 
 func main() {
     wm := parse()
-    for i := 0; i < 60; i++ {
-       wm.step()
+    maxy := wm.getMaxy()
+    for wm.step(maxy) {
+        // pass
     }
-    wm.stdout()
+    // count the water tiles
+    var sum int
+    for k,v := range wm {
+        if v == "~" {
+            if k.y <= maxy {
+                sum++
+            }
+        }
+    }
+    fmt.Printf("%v\n", sum)
 }
 
 
 // will mutate :D
-func (w worldmap) step() {
+func (w worldmap) step(maxy int) bool {
     water := w.waterTiles()
     if len(water) == 0 {
         // one below the spring
         w[point{500,1}] = "~"
-        return
+        return true
     }
 
     var canGoDown bool
     for _, tile := range water {
        below := point{tile.x, tile.y+1}
        //up := point{tile.x, tile.y-1}
-       if w[below] == "" {
+       if w[below] == "" && tile.y <= maxy {
             w[below] = "~"
             canGoDown = true
        } 
@@ -48,6 +58,9 @@ func (w worldmap) step() {
     var leftOrRight bool
     if !canGoDown {
         for _, tile := range water {
+            if tile.y >= maxy {
+                break
+            }
             left := point{tile.x-1, tile.y}
             right := point{tile.x+1, tile.y}
             below := point{tile.x, tile.y+1}
@@ -64,7 +77,9 @@ func (w worldmap) step() {
         }
     }
 
+    var flows = canGoDown || leftOrRight
     if !leftOrRight && !canGoDown {
+        flows = false
         // find the lowest water bucket
         lowestPoint := point{500,1}
         for _, tile := range water {
@@ -77,31 +92,38 @@ func (w worldmap) step() {
                 }
             }
         }
+        
 
         left := point{lowestPoint.x-1, lowestPoint.y}
         right := point{lowestPoint.x+1, lowestPoint.y}
         var moved int 
         for {
+            if lowestPoint.y >= maxy {
+                break
+            }
             moved = 0
             if w[left] == "" {
+                flows = true
                 w[left] = watermark
             }
             if w[right] == "" {
+                flows = true
                 w[right] = watermark
             }
-            if w[point{left.x - 1 ,left.y+1}] != ""{ 
+            if w[point{left.x -1, left.y}] != "#" && w[point{left.x - 1 ,left.y+1}] != ""{ 
                 left = point{left.x - 1, left.y}
                 moved++
             }
-            if w[point{right.x + 1, right.y+1}] != "" {
+            if w[point{right.x + 1, right.x}] != "#" && w[point{right.x + 1, right.y+1}] != "" {
                 right = point{right.x + 1, right.y}
                 moved++
             }
             if moved == 0 {
-                return
+                return flows
             }
         }
     }
+    return flows
 }
 
 func  (w worldmap) waterTiles() []point {
@@ -112,6 +134,26 @@ func  (w worldmap) waterTiles() []point {
         }
     }
     return pnts
+}
+
+func (w worldmap) getMaxy() int {
+    var maxx, minx, maxy, miny int
+    miny, minx = 10000, 10000
+    for p,_ := range w {
+        if p.x > maxx {
+            maxx = p.x
+        }
+        if p.y > maxy {
+            maxy = p.y
+        }
+        if p.x < minx {
+            minx = p.x
+        }
+        if p.y < miny {
+            miny = p.y
+        }
+    }
+    return maxy
 }
 
 // print the world map
@@ -157,7 +199,7 @@ func getNumber(s string) int {
 func parse() worldmap {
     world := make(map[point]string)
     world[point{500,0}] = "+"
-    bytes, _ := ioutil.ReadFile("test.txt")
+    bytes, _ := ioutil.ReadFile("input.txt")
 
     toXy := func(x, y string) (xi, yi []int) {
         xi, yi = []int{}, []int{}
