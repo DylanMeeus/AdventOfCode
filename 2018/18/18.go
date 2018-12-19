@@ -21,16 +21,17 @@ func main() {
     fmt.Printf("%v\n", solve2())
 }
 
-
-
 func solve2() int {
     wm, p := parse()
-
-    for i := 0; i <= 1000000000; i++ {
-        fmt.Printf("%v\n", i)
+    // find repetition in this set
+    for i := 0; i <= 2000; i++ {
         wm = step(wm, p)
+        fmt.Printf("%v counts %v\n", i, count(wm, p))
     }
+    return count(wm, p)
+}
 
+func count(wm world, p *point) int {
     var trees, lumbers int
     for row := 0; row < p.y; row++ {
         for col := 0; col < p.x; col++ {
@@ -52,21 +53,7 @@ func solve() int {
     for i := 0; i <= 10; i++ {
        wm = step(wm, p)
     }
-
-    var trees, lumbers int
-    for row := 0; row < p.y; row++ {
-        for col := 0; col < p.x; col++ {
-            currentp := point{col,row}
-            if wm[currentp] == tree {
-                trees++
-            }
-            if wm[currentp] == lumber {
-                lumbers++
-            }
-        }
-    }
-
-    return trees * lumbers
+    return count(wm, p)
 }
 
 func step(w world, max *point) (world) {
