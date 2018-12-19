@@ -13,7 +13,7 @@ Working out the remaining cycles gives us: `100.000.000 - 2000 = 999.998.000`.
 Thus we can find out how close we'd be to completing 28 full cycles when we have reached our final
 goal: `999.998.000 mod 28 = 8`.
 
-Again, opening output.txt you can count 8 lines upwards from where you first encounter 19830.
+Again, opening output.txt you can count 8 lines down from where you first encounter 19830.
 
 (Or be fancy in vim and go:
  `/19830 -> 7j`)
