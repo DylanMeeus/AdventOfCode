@@ -3,11 +3,6 @@ package opcodes
 // addition
 
 var Functions = []Op{Addr,Mulr,Banr,Borr,Setr,Gtrr,Eqrr,Addi,Muli,Bani,Bori,Seti,Gtri,Eqri,Gtir,Eqir}
-var RegFuncs = []interface{}{Addr, Mulr, Banr, Borr, Setr, Gtrr, Eqrr}
-var ValueFuncs = []interface{}{Addi, Muli, Bani, Bori, Seti}
-var RegValueFuncs = []interface{}{Gtri, Eqri}
-var ValueRegFuncs = []interface{}{Gtir, Eqir}
-
 
 type Op func(in1, in2, out int, regs *[4]int)
 
