@@ -9,6 +9,9 @@ def add(fst, snd):
     x,y = fst[0] + snd[0], fst[1] + snd[1]
     return (x,y)
 
+def solve2(rgx):
+    return len(list(filter(lambda k: k >= 1000, solve(rgx).values())))
+
 def solve(rgx): 
     stack = []
     current = (0,0)
@@ -30,8 +33,10 @@ def solve(rgx):
             distance, current = groups[len(groups)-1]
         elif char == ")":
             groups.pop()
-    print(max(distances.values()))
+    return distances
 
 if __name__ == '__main__':
     rgx = open("input.txt",'r').read()
-    solve(rgx)
+    print(max(solve(rgx).values()))
+    print(solve2(rgx))
+
