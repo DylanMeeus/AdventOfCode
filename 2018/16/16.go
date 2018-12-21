@@ -16,9 +16,42 @@ type data struct {
 func main(){
     dat := parse()
     fmt.Printf("%v\n", solve(dat))
+    fmt.Printf("%v\n", solve2(dat))
 }
 
 
+
+func solve2(dat []*data) int {
+    var count int
+    possibleMatches := make(map[int][]*opcodes.Op)
+    for i := 0; i < 16; i++ {
+        possibleMatches[i] = []*opcodes.Op{}
+    }
+    for _,d := range dat {
+        code := d.operation[0]
+        in1 := d.operation[1]
+        in2 := d.operation[2]
+        out := d.operation[3]
+        for i := 0; i < len(opcodes.Functions); i++ {
+            f := opcodes.Functions[i]
+            cop := [4]int{d.before[0], d.before[1], d.before[2], d.before[3]}
+            f(in1,in2,out,&cop)
+            if cop == d.after {
+                var contains bool
+                for _,v := range possibleMatches[code] {
+                    if v == &opcodes.Functions[i] {
+                        contains = true 
+                    }
+                }
+                if !contains{
+                    possibleMatches[code] = append(possibleMatches[code], &opcodes.Functions[i])
+                }
+            }
+        }
+    }
+    fmt.Printf("%v\n", possibleMatches)
+    return count
+}
 
 func solve(dat []*data) int {
     var count int
