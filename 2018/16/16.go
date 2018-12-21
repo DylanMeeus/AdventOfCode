@@ -14,7 +14,7 @@ type data struct {
 }
 
 func main(){
-    dat := parse()
+    dat := parse("input.txt")
     fmt.Printf("%v\n", solve(dat))
     fmt.Printf("%v\n", solve2(dat))
 }
@@ -22,7 +22,6 @@ func main(){
 
 
 func solve2(dat []*data) int {
-    var count int
     possibleMatches := make(map[int][]*opcodes.Op)
     for i := 0; i < 16; i++ {
         possibleMatches[i] = []*opcodes.Op{}
@@ -49,8 +48,46 @@ func solve2(dat []*data) int {
             }
         }
     }
-    fmt.Printf("%v\n", possibleMatches)
-    return count
+    mappedOpcodes := filter(possibleMatches)
+    instructions := parseInstructions()
+    var reg [4]int
+    for _, instruction := range instructions {
+        code := instruction[0]
+        in1 := instruction[1]
+        in2 := instruction[2]
+        out := instruction[3]
+        f := *mappedOpcodes[code]
+        f(in1, in2, out, &reg)
+    }
+    fmt.Printf("%v\n", reg)
+
+    return len(mappedOpcodes) 
+}
+
+func filter(possible map[int][]*opcodes.Op) (map[int]*opcodes.Op){
+    certain := make(map[int]*opcodes.Op)
+
+    for len(certain) < 16 {
+        for k,v := range possible {
+            if len(v) == 1 {
+                certain[k] = v[0]
+                // remove this one from all others
+                for other,vother := range possible {
+                    if other != k {
+                        options := []*opcodes.Op{}
+                        for _,option := range vother {
+                            if option != v[0] {
+                                options = append(options, option)
+                            }
+                        }
+                        possible[other] = options
+                    }
+                }
+            }
+        }
+    }
+    fmt.Printf("%v\n", certain)
+    return certain
 }
 
 func solve(dat []*data) int {
@@ -74,8 +111,21 @@ func solve(dat []*data) int {
     return count
 }
 
-func parse() []*data {
-    bytes, _ := ioutil.ReadFile("input.txt")
+func parseInstructions() [][4]int {
+    bytes,_ := ioutil.ReadFile("program.txt")
+    ops := make([][4]int,0)
+    for _, line := range strings.Split(string(bytes), "\n") {
+        if line == "" {
+            continue
+        }   
+        ops = append(ops, Stoa(line))
+    }
+    return ops
+        
+}
+
+func parse(file string) []*data {
+    bytes, _ := ioutil.ReadFile(file)
     parts := strings.Split(string(bytes), "\n") 
     var i int
     exs := make([]*data,0)
