@@ -5,6 +5,17 @@ package opcodes
 var Functions = []Op{Addr,Mulr,Banr,Borr,Setr,Gtrr,Eqrr,Addi,Muli,Bani,Bori,Seti,Gtri,Eqri,Gtir,Eqir}
 
 
+var Operators = map[string]Op{
+    "addi": Addi,
+    "seti": Seti,
+    "muli": Muli,
+    "mulr": Mulr,
+    "eqrr": Eqrr,
+    "addr": Addr,
+    "gtrr": Gtrr,
+}
+
+
 type Op func(in1, in2, out int, regs *[6]int)
 
 func Addr(in1, in2, out int, regs *[6]int) {

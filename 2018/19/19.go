@@ -8,46 +8,59 @@ import (
     "./opcodes"
 )
 
-type data struct {
-    before, operation, after [4]int
-}
 
+var _ = opcodes.Functions
+
+type instruction struct {
+    opcode string
+    data [3]int
+}
 func main(){
     instructions := parseInstructions()
     fmt.Printf("%v\n", solve(instructions))
 }
 
 
-func solve(instructions [][6]int) {
+func solve(instructions []instruction) int {
+    reg := [6]int{}
     ip := 4
+    ci := 0
+    for ci < len(instructions){
+        instruction := instructions[ci]
+        reg[ip] = ci
+        in1 := instruction.data[0]
+        in2 := instruction.data[1]
+        out := instruction.data[2]
+        f := opcodes.Operators[instruction.opcode]
+        f(in1, in2, out, &reg)
+        // fetch next instruction
+        ci = reg[ip]
+        ci++
+    }
+    return reg[0]
 }
 
 
-func parseInstructions() [][6]int {
-    bytes,_ := ioutil.ReadFile("program.txt")
-    ops := make([][6]int,0)
+func parseInstructions() []instruction {
+    bytes,_ := ioutil.ReadFile("input.txt")
+    ops := make([]instruction,0)
     for _, line := range strings.Split(string(bytes), "\n") {
         if line == "" {
             continue
         }   
-        ops = append(ops, Stoa(line))
+        inst := instruction{strings.Split(line, " ")[0], Stoa(line)}
+        ops = append(ops, inst)
     }
     return ops
         
 }
 
-func Stoa(in string) [6]int {
+func Stoa(in string) [3]int {
     // replace possible [], with ''
-    sane := strings.Map(func(r rune) rune {
-        if r == rune('[') || r == rune(']') || r == rune(',') {
-            return -1
-        }
-        return r
-    }, in)
-    numbers := [6]int{}
+    numbers := [3]int{}
     var index int
-    nums := strings.Split(sane, " ")
-    for _,n := range nums {
+    nums := strings.Split(in, " ")
+    for _,n := range nums[1:] {
         if n == "" {
             continue
         }
