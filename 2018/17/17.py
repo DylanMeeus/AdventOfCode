@@ -65,7 +65,7 @@ def solve(world):
         if len(active) == 0:
             sump = 0
             for k in world.keys():
-                if k[1] >= miny and k[1] <= maxy:
+                if k[1] >= miny and k[1] < maxy:
                     if world[k] in "~|":
                         sump+=1
             return sump
@@ -153,5 +153,5 @@ if __name__ == '__main__':
     data = open("input.txt","r").read().split("\n")
     w = parse(data)
     print(solve(w))
-    draw(w)
+    #draw(w)
 
