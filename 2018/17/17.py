@@ -74,6 +74,8 @@ def solve(world):
             if add(water, down) not in world:
                 world[add(water,down)] = "|"
                 newactive.append(add(water,down))
+            elif world[add(water,down)] == "|":
+                pass
             else:
                 # water can't go down
                 l = add(water, left)
@@ -148,8 +150,8 @@ def isBounded(world, point):
     
 
 if __name__ == '__main__':
-    data = open(".txt","r").read().split("\n")
+    data = open("input.txt","r").read().split("\n")
     w = parse(data)
     print(solve(w))
-    #draw(w)
+    draw(w)
 
