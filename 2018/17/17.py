@@ -66,7 +66,7 @@ def solve(world):
             sump = 0
             for k in world.keys():
                 if k[1] >= miny and k[1] < maxy:
-                    if world[k] in "~|":
+                    if world[k] in "~": # change this to |~ for part 1
                         sump+=1
             return sump
 
