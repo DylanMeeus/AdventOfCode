@@ -18,8 +18,29 @@ type instruction struct {
 func main(){
     instructions := parseInstructions()
     fmt.Printf("%v\n", solve(instructions))
+    fmt.Printf("%v\n", solve2(instructions))
 }
 
+func solve2(instructions []instruction) int {
+    reg := [6]int{}
+    reg[0] = 1
+    ip := 4
+    ci := 0
+    for ci < len(instructions){
+        instruction := instructions[ci]
+        reg[ip] = ci
+        in1 := instruction.data[0]
+        in2 := instruction.data[1]
+        out := instruction.data[2]
+        f := opcodes.Operators[instruction.opcode]
+        //fmt.Printf("lookup %v: %v\n", instruction.opcode, f)
+        f(in1, in2, out, &reg)
+        // fetch next instruction
+        ci = reg[ip]
+        ci++
+    }
+    return reg[0]
+}
 
 func solve(instructions []instruction) int {
     reg := [6]int{}

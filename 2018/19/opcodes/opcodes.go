@@ -8,6 +8,7 @@ var Functions = []Op{Addr,Mulr,Banr,Borr,Setr,Gtrr,Eqrr,Addi,Muli,Bani,Bori,Seti
 var Operators = map[string]Op{
     "addi": Addi,
     "seti": Seti,
+    "setr": Setr,
     "muli": Muli,
     "mulr": Mulr,
     "eqrr": Eqrr,

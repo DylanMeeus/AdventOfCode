@@ -15,9 +15,48 @@ type instruction struct {
 }
 func main(){
     instructions := parseInstructions()
-    fmt.Printf("%v\n", solve(instructions))
+    //fmt.Printf("%v\n", solve(instructions))
+    fmt.Printf("%v\n", solve2(instructions))
 }
 
+func solve2(instructions []instruction) int {
+    i := 0 
+    seen := make(map[int]bool)
+    outer:
+    for {
+        //fmt.Printf("starting outer with %v\n", i)
+        reg := [6]int{}
+        reg[0] = i
+        ip := 5
+        ci := 0
+        completed := 0
+        for ci < len(instructions){
+            instruction := instructions[ci]
+            reg[ip] = ci
+            lookingFor := ci == 28 
+            in1 := instruction.data[0]
+            in2 := instruction.data[1]
+            out := instruction.data[2]
+            if lookingFor {
+                // check if we already contain this value
+                if seen[completed] && len(seen) > 1 {
+                    fmt.Printf("%v\n", completed)
+                    return i 
+                }
+                seen[completed] = true
+                i++
+                goto outer 
+            }
+            f := opcodes.Operators[instruction.opcode]
+            f(in1, in2, out, &reg)
+        
+            ci = reg[ip]
+            completed++
+            ci++
+        }
+    }
+    return -1 // something went wrong! 
+}
 func solve(instructions []instruction) int {
     reg := [6]int{}
     ip := 5
