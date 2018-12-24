@@ -1,21 +1,28 @@
 from functools import reduce
 
-depth = 510 
+depth = 11109 
 target = (9,731)
 
+#depth = 510
+#target = (10,10)
+
+geo_map = {}
 
 def solve():
     # create the map
     # Need to make a map of (9,731)
     world = {}
-    for y in range(10+1): # test
-        for x in range(10+1): # test
-            world[(x,y)] = get_erosion(geo_index((x,y),world))
-    #print(world)
-    # calculate the risk
-    risk = reduce(lambda y,x: y + (x % 3), world.values())
+    for y in range(target[1]+1): # test
+        for x in range(target[0]+1): # test
+            world[(x,y)] = get_erosion(geo_index((x,y)))
+    # calculate the risk     
+    risk = 0
+    for v in world.values():
+        risk += v % 3
+    risk -= world[target] % 3
+        
     print(risk)
-    print(stdout(world))
+    #print(stdout(world))
      
 
 
@@ -33,7 +40,7 @@ def stdout(world):
         out += "\n"
     return out
 
-def geo_index(point, world):
+def geo_index(point):
     x,y = point[0], point[1]
     if x == 0 and y == 0:
         return 0
@@ -44,9 +51,11 @@ def geo_index(point, world):
     # else
     left = (x - 1, y)
     up = (x,y - 1)
-    leftvalue = geo_index(left, world)
-    upvalue = geo_index(up, world)
-    return get_erosion(leftvalue) * get_erosion(upvalue)
+    if left not in geo_map:
+        geo_map[left] = geo_index(left)
+    if up not in geo_map:
+        geo_map[up] = geo_index(up)
+    return get_erosion(geo_map[left]) * get_erosion(geo_map[up])
 
 def get_erosion(geodex):
     return (geodex + depth) % 20183 
