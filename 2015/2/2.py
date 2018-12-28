@@ -12,9 +12,7 @@ def parse():
     return vecs
 
 
-if __name__ == '__main__':
-    data = parse()
-    # 2*l*w + 2*w*h + 2*h*l
+def solve(data):
     s = 0
     for entry in data:
         l,w,h = entry
@@ -22,7 +20,23 @@ if __name__ == '__main__':
         # multiply all sides, divide by largest. result is multiplication of two smallest :)
         a += (l*w*h)/max(entry)
         s += a
-    print(s)
+    return s
+
+def solve2(data):
+    # how much feet of ribbon do they need
+    s = 0
+    for entry in data:
+        l,w,h = entry
+        # find the two smallest faces
+        s += (l*2 + w*2 + h*2) - (max(entry)*2)
+        s += (l*w*h)
+    return s
+
+if __name__ == '__main__':
+    data = parse()
+    print(solve(data))
+    print(solve2(data))
+    # 2*l*w + 2*w*h + 2*h*l
 
 
 
