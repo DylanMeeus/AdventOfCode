@@ -16,7 +16,7 @@ const (
 func main(){
     var hashed string
     i := 0
-    for !strings.HasPrefix(hashed,"00000") {
+    for !strings.HasPrefix(hashed,"000000") {
         testHash := fmt.Sprintf("%v%v",input,i)
         hashed = hash(testHash)
         i += 1
