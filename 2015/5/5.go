@@ -28,6 +28,11 @@ func main() {
     }
     input := string(b)
     lines := strings.Split(input, "\n")
+    solve1(lines)
+    solve2(lines)
+}
+
+func solve1(lines []string) {
     nice := 0
     for _, word := range lines {
         parts := strings.Split(word, "")
@@ -38,6 +43,39 @@ func main() {
     fmt.Printf("%v\n",nice)
 }
 
+func solve2(lines []string) {
+    nice := 0
+    for _, word := range lines {
+        parts := strings.Split(word, "")
+        if skipRepeat(parts) && twiceNoOverlap(parts) {
+            nice++
+        }
+    }
+    fmt.Printf("%v\n",nice)
+}
+
+func twiceNoOverlap(xs []string) bool {
+    for i := 0; i < len(xs) - 2; i++ {
+        a,b := xs[i], xs[i+1]
+        // now check how often this appears without overlapping  
+        for j := i + 2; j < len(xs) - 1; j++ {
+            if xs[j] == a && xs[j+1] == b {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+// same char appears in slot n + 1
+func skipRepeat(xs []string) bool {
+    for i := 0; i < len(xs) - 2; i++ {
+        if xs[i] == xs[i+2] {
+            return true
+        }
+    }
+    return false
+}
 
 func twice(xs []string) bool {
     for i := 0; i < len(xs) - 1; i++ {
