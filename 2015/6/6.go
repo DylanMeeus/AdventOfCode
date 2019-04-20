@@ -40,6 +40,48 @@ func NewPoint(in string) point {
 }
 
 func main() {
+    grid := make([][]int,1000)
+    for i,_ := range grid {
+        grid[i] = make([]int, 1000)
+    }
+    b, err := ioutil.ReadFile("input.txt")
+    if err != nil {
+        panic(err)
+    }
+    instructions := string(b)
+    lines := strings.Split(instructions, "\n")
+    for _, line := range lines[:len(lines)-1] {
+        trans, start, end := parse(line)
+        for row := start.x; row <= end.x; row++ {
+            for col := start.y; col <= end.y; col++ {
+                switch trans {
+                case ON:
+                    grid[row][col]++
+                case OFF:
+                    grid[row][col]--
+                    if grid[row][col] < 0 {
+                        grid[row][col] = 0
+                    }
+                case TOGGLE:
+                    grid[row][col] += 2
+                }
+            }
+        }
+    }
+    fmt.Println(count2(grid))
+}
+
+func count2(g [][]int) int {
+    c := 0
+    for _,row := range g {
+        for _, col := range row {
+            c += col
+        }
+    }
+    return c
+}
+
+func solve1() {
     grid := make([][]bool,1000)
     for i,_ := range grid {
         grid[i] = make([]bool, 1000)
