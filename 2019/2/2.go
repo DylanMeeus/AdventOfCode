@@ -12,11 +12,9 @@ var (
 )
 
 func main() {
-	data := readData()
-	data[1] = 12
-	data[2] = 2
-	data = solve(data)
-	fmt.Printf("%v\n", data[0])
+	solve1()
+	res := solve2()
+	fmt.Printf("%v\n", res)
 }
 
 func readData() (out []int) {
@@ -35,13 +33,36 @@ func readData() (out []int) {
 	return
 }
 
-func solve(input []int) []int {
+func solve1() {
+	data := readData()
+	data[1] = 12
+	data[2] = 2
+	data = calculate(data)
+	fmt.Printf("%v\n", data[0])
+}
+
+func solve2() int {
+	target := 19690720
+	for a := 0; a < 100; a++ {
+		for b := 0; b < 100; b++ {
+			data := readData()
+			data[1] = a
+			data[2] = b
+			data = calculate(data)
+			if data[0] == target {
+				return (100 * a) + b
+			}
+		}
+	}
+	return 0
+}
+
+func calculate(input []int) []int {
 	for i := 0; i < len(input); i += 4 {
 		opcode := input[i]
 		ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 		switch opcode {
 		case 99:
-			fmt.Printf("%v\n", input)
 			return input
 		case 1:
 			input[store] = input[ind1] + input[ind2]
