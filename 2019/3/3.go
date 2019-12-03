@@ -9,27 +9,52 @@ import (
 )
 
 type point struct {
-	a, b int
+	a, b  int
+	steps int
 }
 
 type wire []string
 
 func main() {
-	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
 }
 
+func solve2() int {
+	a, b := readData()
+	as, bs := a.unroll(), b.unroll()
+	// find collisions
+	var min *int
+start:
+	for _, x := range as {
+		for _, y := range bs {
+			if x.a == y.a && x.b == y.b {
+				fmt.Printf("another cross.. %v\n", x.steps+y.steps)
+				st := x.steps + y.steps
+				if min == nil || st < *min {
+					min = &st
+				}
+				continue start
+			}
+		}
+	}
+	return *min
+}
 func solve1() int {
 	a, b := readData()
 	as, bs := a.unroll(), b.unroll()
 	// find collisions
 	crosses := []point{}
+start:
 	for _, x := range as {
 		for _, y := range bs {
-			if x == y {
+			if x.a == y.a && x.b == y.b {
+				fmt.Printf("another cross.. %v\n", x.steps+y.steps)
 				crosses = append(crosses, x)
+				continue start
 			}
 		}
 	}
+	fmt.Printf("done: %v\n", crosses)
 	// calculate manhattan distance
 	var max *int
 	for _, c := range crosses {
@@ -42,7 +67,8 @@ func solve1() int {
 }
 
 // return all points on the wire..
-func (w wire) unroll() (out []point) {
+func (w wire) unroll() []point {
+	out := map[point]struct{}{}
 	var x, y int
 	for _, p := range w {
 		char := string(p[0])
@@ -61,11 +87,20 @@ func (w wire) unroll() (out []point) {
 			case "D":
 				y++
 			}
-			out = append(out, point{x, y})
+			po := point{x, y, len(out) + 1}
+			if _, ok := out[po]; !ok {
+				out[po] = struct{}{}
+			}
 		}
 
 	}
-	return
+	m := make([]point, len(out))
+	var i int
+	for k, _ := range out {
+		m[i] = k
+		i++
+	}
+	return m
 }
 
 func readData() (wire, wire) {
