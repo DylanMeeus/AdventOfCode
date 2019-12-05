@@ -37,7 +37,7 @@ func solve1() {
 }
 
 func calculate(input []int) []int {
-	readFunc := func() int { return 1 }
+	readFunc := func() int { return 5 }
 	for i := 0; i < len(input); {
 		codeparam := strconv.Itoa(input[i])
 		var opcode string
@@ -86,6 +86,70 @@ func calculate(input []int) []int {
 			store := input[i+1]
 			fmt.Printf("%v\n", input[store])
 			i += 2
+		case "05":
+			ind1, ind2 := input[i+1], input[i+2]
+			a := ind1
+			b := ind2
+			if mode1 == "0" {
+				a = input[ind1]
+			}
+			if mode2 == "0" {
+				b = input[ind2]
+			}
+			if a != 0 {
+				i = b
+			} else {
+				i += 3
+			}
+		case "06":
+			ind1, ind2 := input[i+1], input[i+2]
+			a := ind1
+			b := ind2
+			if mode1 == "0" {
+				a = input[ind1]
+			}
+			if mode2 == "0" {
+				b = input[ind2]
+			}
+			if a == 0 {
+				i = b
+			} else {
+				i += 3
+			}
+		case "07":
+			// less than
+			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
+			a := ind1
+			b := ind2
+			if mode1 == "0" {
+				a = input[ind1]
+			}
+			if mode2 == "0" {
+				b = input[ind2]
+			}
+			if a < b {
+				input[store] = 1
+			} else {
+				input[store] = 0
+			}
+			i += 4
+		case "08":
+			// equals
+			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
+			a := ind1
+			b := ind2
+			if mode1 == "0" {
+				a = input[ind1]
+			}
+			if mode2 == "0" {
+				b = input[ind2]
+			}
+			if a == b {
+				input[store] = 1
+			} else {
+				input[store] = 0
+			}
+			i += 4
 		default:
 			i++
 		}
