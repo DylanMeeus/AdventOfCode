@@ -15,6 +15,30 @@ func main() {
 	solve1()
 }
 
+func readPermutations() (out [][]int) {
+	data, err := ioutil.ReadFile("permutations.txt")
+	if err != nil {
+		panic(err)
+	}
+	ss := string(data)[1 : len(string(data))-1]
+	permutations := make([][]int, 0)
+	for i := 0; i < len(ss); i += 12 {
+		part := ss[i : i+11]
+		numbers := part[1 : len(part)-1]
+		nums := strings.Split(numbers, ",")
+		numss := []int{}
+		for _, n := range nums {
+			num, err := strconv.Atoi(n)
+			if err != nil {
+				panic(err)
+			}
+			numss = append(numss, num)
+		}
+		permutations = append(permutations, numss)
+	}
+	return permutations
+}
+
 func readData() (out []int) {
 	data, err := ioutil.ReadFile("input.txt")
 	if err != nil {
@@ -32,12 +56,39 @@ func readData() (out []int) {
 }
 
 func solve1() {
-	data := readData()
-	calculate(data)
+	perm := readPermutations()
+	var max int
+	amps := []string{"A", "B", "C", "D", "E"}
+	for _, p := range perm {
+		var ampOutput int
+		for _, _ = range amps {
+			data := readData()
+			ampInput := []int{}
+			ampInput = append(ampInput, p[0], ampOutput)
+			p = p[1:]
+			// + the output of the previous one
+			output := calculate(data, func() int {
+				i := ampInput[0]
+				ampInput = ampInput[1:]
+				return i
+			})
+			strOut := ""
+			for _, o := range output {
+				strOut += strconv.Itoa(o)
+			}
+			intOut, _ := strconv.Atoi(strOut)
+			if intOut > max {
+				max = intOut
+			}
+			ampOutput = intOut
+		}
+	}
+	fmt.Println(max)
 }
 
-func calculate(input []int) []int {
-	readFunc := func() int { return 5 }
+// calculate collects println statements and returns those
+func calculate(input []int, readFunc func() int) []int {
+	printstmt := []int{}
 	for i := 0; i < len(input); {
 		codeparam := strconv.Itoa(input[i])
 		var opcode string
@@ -53,7 +104,8 @@ func calculate(input []int) []int {
 		}
 		switch opcode {
 		case "99":
-			return input
+			return printstmt
+
 		case "01":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := ind1
@@ -84,7 +136,8 @@ func calculate(input []int) []int {
 			i += 2
 		case "04":
 			store := input[i+1]
-			fmt.Printf("%v\n", input[store])
+			printstmt = append(printstmt, input[store])
+			// aggregate them all
 			i += 2
 		case "05":
 			ind1, ind2 := input[i+1], input[i+2]
