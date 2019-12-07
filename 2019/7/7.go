@@ -63,18 +63,26 @@ func solve2() {
 	// go routine per amp?
 	for _, p := range perm {
 		p = []int{9,8,7,6,5}
-		achan := make(chan int, 1)
+		achan := make(chan int, 2)
 		bchan := make(chan int, 1)
 		cchan := make(chan int, 1)
 		dchan := make(chan int, 1)
 		echan := make(chan int, 1)
-		total := make(chan int, 4)
+		chancount := 4
+		total := make(chan int, chancount)
+		achan <- p[0]
+		achan <- 0
+		bchan <- p[1]
+		cchan <- p[2]
+		dchan <- p[3]
+		echan <- p[4]
 		go runAmp([]int{p[0],0}, echan, achan, total)
 		go runAmp([]int{p[1]}, achan, bchan, total)
 		go runAmp([]int{p[2]}, bchan, cchan, total)
 		go runAmp([]int{p[3]}, cchan, dchan, total)
 		go runAmp([]int{p[4]}, dchan, echan, total)
-		for t := range total {
+		for bfr := 0; bfr < chancount+1; bfr++ {
+			t := <-total
 			if t > max {
 				max = t
 			}
@@ -89,12 +97,13 @@ func runAmp(start []int, r, w, total chan int) {
 	// + the output of the previous one
 	go calculate(data, func() int {
 		t := <- r
-		fmt.Printf("read %v from r\n", t)
 		return t
 	}, w,  total)
+	/*
 	for _,s := range start {
 		r <-s
 	}
+	 */
 	/*
 		strOut := ""
 		for _, o := range output {
@@ -158,7 +167,6 @@ func calculate(input []int, readFunc func() int, w, total chan int) []int {
 		}
 		switch opcode {
 		case "99":
-			fmt.Printf("returned %v\n", printstmt)
 			close(w)
 			total <- printstmt[len(printstmt)-1]
 			return printstmt
@@ -191,10 +199,8 @@ func calculate(input []int, readFunc func() int, w, total chan int) []int {
 			input[store] = readFunc()
 			i += 2
 		case "04":
-			fmt.Println("in 4")
 			store := input[i+1]
 			w <- input[store]
-			fmt.Printf("wrote %v\n", input[store])
 			printstmt = append(printstmt, input[store])
 			// aggregate them all
 			i += 2
