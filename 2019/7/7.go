@@ -41,7 +41,7 @@ func readPermutations() (out [][]int) {
 }
 
 func readData() (out []int) {
-	data, err := ioutil.ReadFile("./test.txt")
+	data, err := ioutil.ReadFile("./input.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +62,6 @@ func solve2() {
 	//amps := []string{"A", "B", "C", "D", "E"}
 	// go routine per amp?
 	for _, p := range perm {
-		p = []int{9,8,7,6,5}
 		achan := make(chan int, 2)
 		bchan := make(chan int, 1)
 		cchan := make(chan int, 1)
@@ -87,7 +86,6 @@ func solve2() {
 				max = t
 			}
 		}
-		break
 	}
 	fmt.Println(max)
 }
