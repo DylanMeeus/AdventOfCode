@@ -20,15 +20,54 @@ type tree struct {
 }
 
 func main() {
-	fmt.Println("vim-go")
-	d := readData()
-	fmt.Printf("%v\n", d)
-	solve(d)
+	m, t := readData()
+	total := solve(m, t)
+	fmt.Printf("%v\n", total)
 }
 
-func solve(t tree) {
-	fmt.Printf("%v\n", t.root.children)
-	printy(t.root)
+func solve(m map[string][]string, t tree) int {
+	var sum int
+	collapsed := map[string]struct{}{}
+	for k, v := range m {
+		collapsed[k] = struct{}{}
+		for _, s := range v {
+			collapsed[s] = struct{}{}
+		}
+	}
+	for k, _ := range collapsed {
+		orbits := 0 // one is direct
+		n := findNode(k, t.root)
+		if n == t.root {
+			continue
+		}
+		for p := findParent(t.root, n); p.name != t.root.name; {
+			orbits++
+			p = findParent(t.root, p)
+		}
+		sum += orbits + 1
+	}
+	return sum // remove COM
+}
+
+func toRoot(n *node, steps int) int {
+	if n.name == "COM" {
+		return steps
+	}
+	return 0
+
+}
+
+func findParent(current, target *node) *node {
+	for _, n := range current.children {
+		if n.name == target.name {
+			return current
+		}
+		lookup := findParent(n, target)
+		if lookup != nil {
+			return lookup
+		}
+	}
+	return nil
 }
 
 func printy(n *node) {
@@ -38,8 +77,8 @@ func printy(n *node) {
 	}
 }
 
-func readData() tree {
-	data, err := ioutil.ReadFile("test.txt")
+func readData() (map[string][]string, tree) {
+	data, err := ioutil.ReadFile("input.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +99,7 @@ func readData() tree {
 		m[first] = append(m[first], second)
 	}
 	mapToTree(&t, "COM", m)
-	return t
+	return m, t
 }
 
 func mapToTree(t *tree, cur string, m map[string][]string) {
