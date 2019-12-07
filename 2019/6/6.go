@@ -23,6 +23,36 @@ func main() {
 	m, t := readData()
 	total := solve(m, t)
 	fmt.Printf("%v\n", total)
+	steps := solve2(t)
+	fmt.Printf("%v\n", steps)
+}
+
+func solve2(t tree) int {
+	// find first common ancestor
+	younode := findNode("YOU", t.root)
+	sannode := findNode("SAN", t.root)
+
+	// trace path to root
+	youPath := []string{}
+	for p := findParent(t.root, younode); p.name != t.root.name; {
+		youPath = append(youPath, p.name)
+		p = findParent(t.root, p)
+	}
+	sanPath := []string{}
+	for p := findParent(t.root, sannode); p.name != t.root.name; {
+		sanPath = append(sanPath, p.name)
+		p = findParent(t.root, p)
+	}
+
+	// find common ancestor
+	for i, y := range youPath {
+		for j, s := range sanPath {
+			if y == s {
+				return i + j
+			}
+		}
+	}
+	return 0
 }
 
 func solve(m map[string][]string, t tree) int {
