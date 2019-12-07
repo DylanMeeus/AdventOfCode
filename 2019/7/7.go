@@ -12,11 +12,12 @@ var (
 )
 
 func main() {
-	solve1()
+	//solve1()
+	solve2()
 }
 
 func readPermutations() (out [][]int) {
-	data, err := ioutil.ReadFile("permutations.txt")
+	data, err := ioutil.ReadFile("./permutations2.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +41,7 @@ func readPermutations() (out [][]int) {
 }
 
 func readData() (out []int) {
-	data, err := ioutil.ReadFile("input.txt")
+	data, err := ioutil.ReadFile("./test.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -55,6 +56,58 @@ func readData() (out []int) {
 	return
 }
 
+func solve2() {
+	perm := readPermutations()
+	var max int
+	//amps := []string{"A", "B", "C", "D", "E"}
+	// go routine per amp?
+	for _, p := range perm {
+		p = []int{9,8,7,6,5}
+		achan := make(chan int, 1)
+		bchan := make(chan int, 1)
+		cchan := make(chan int, 1)
+		dchan := make(chan int, 1)
+		echan := make(chan int, 1)
+		total := make(chan int, 4)
+		go runAmp([]int{p[0],0}, echan, achan, total)
+		go runAmp([]int{p[1]}, achan, bchan, total)
+		go runAmp([]int{p[2]}, bchan, cchan, total)
+		go runAmp([]int{p[3]}, cchan, dchan, total)
+		go runAmp([]int{p[4]}, dchan, echan, total)
+		for t := range total {
+			if t > max {
+				max = t
+			}
+		}
+		break
+	}
+	fmt.Println(max)
+}
+
+func runAmp(start []int, r, w, total chan int) {
+	data := readData()
+	// + the output of the previous one
+	go calculate(data, func() int {
+		t := <- r
+		fmt.Printf("read %v from r\n", t)
+		return t
+	}, w,  total)
+	for _,s := range start {
+		r <-s
+	}
+	/*
+		strOut := ""
+		for _, o := range output {
+			strOut += strconv.Itoa(o)
+		}
+		intOut, _ := strconv.Atoi(strOut)
+		if intOut > max {
+			max = intOut
+		}
+	*/
+}
+
+/*
 func solve1() {
 	perm := readPermutations()
 	var max int
@@ -85,9 +138,10 @@ func solve1() {
 	}
 	fmt.Println(max)
 }
+*/
 
 // calculate collects println statements and returns those
-func calculate(input []int, readFunc func() int) []int {
+func calculate(input []int, readFunc func() int, w, total chan int) []int {
 	printstmt := []int{}
 	for i := 0; i < len(input); {
 		codeparam := strconv.Itoa(input[i])
@@ -104,8 +158,10 @@ func calculate(input []int, readFunc func() int) []int {
 		}
 		switch opcode {
 		case "99":
+			fmt.Printf("returned %v\n", printstmt)
+			close(w)
+			total <- printstmt[len(printstmt)-1]
 			return printstmt
-
 		case "01":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := ind1
@@ -135,7 +191,10 @@ func calculate(input []int, readFunc func() int) []int {
 			input[store] = readFunc()
 			i += 2
 		case "04":
+			fmt.Println("in 4")
 			store := input[i+1]
+			w <- input[store]
+			fmt.Printf("wrote %v\n", input[store])
 			printstmt = append(printstmt, input[store])
 			// aggregate them all
 			i += 2
@@ -207,5 +266,15 @@ func calculate(input []int, readFunc func() int) []int {
 			i++
 		}
 	}
+	strOut := ""
+	for _, o := range printstmt {
+		strOut += strconv.Itoa(o)
+	}
+	intOut, err := strconv.Atoi(strOut)
+	if err != nil{
+		panic(err)
+	}
+	fmt.Printf("writing %v\n", intOut)
+	w <- intOut
 	return input
 }
