@@ -97,21 +97,6 @@ func runAmp(start []int, r, w, total chan int) {
 		t := <- r
 		return t
 	}, w,  total)
-	/*
-	for _,s := range start {
-		r <-s
-	}
-	 */
-	/*
-		strOut := ""
-		for _, o := range output {
-			strOut += strconv.Itoa(o)
-		}
-		intOut, _ := strconv.Atoi(strOut)
-		if intOut > max {
-			max = intOut
-		}
-	*/
 }
 
 /*
