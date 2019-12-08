@@ -17,6 +17,51 @@ const (
 func main() {
 	rd := readData()
 	fmt.Printf("%v \n", solve1(rd))
+	solve2(rd)
+}
+
+func solve2(input []int) []int {
+	// divide it in layers
+	cs := w * h
+	layers := make([][]int, 0)
+	for i := 0; i < len(input); i += cs {
+		layers = append(layers, input[i:i+cs])
+	}
+	// collapse the layers..
+	current := layers[0]
+	for i := 1; i < len(layers); i++ {
+		next := layers[i]
+		current = merge(current, next)
+	}
+	printImage(current)
+	return []int{}
+}
+
+func printImage(img []int) {
+	fmt.Println(img)
+	for i, n := range img {
+		if i%w == 0 {
+			fmt.Println()
+		}
+		if n == 1 {
+			fmt.Print(n)
+		} else {
+			fmt.Print(" ")
+		}
+	}
+	fmt.Println()
+}
+
+func merge(l1, l2 []int) []int {
+	out := make([]int, len(l1))
+	for i, n := range l1 {
+		if n == 2 {
+			out[i] = l2[i]
+		} else {
+			out[i] = n
+		}
+	}
+	return out
 }
 
 func solve1(input []int) int {
