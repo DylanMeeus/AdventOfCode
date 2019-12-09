@@ -33,7 +33,8 @@ func solve1() {
 }
 
 func calculate(input []int) []int {
-	readFunc := func() int { return 5 }
+	input = append(input, make([]int,34915192)...)
+	readFunc := func() int { return 1 }
 	var relativeBase int
 	for i := 0; i < len(input); {
 		codeparam := strconv.Itoa(input[i])
@@ -53,46 +54,40 @@ func calculate(input []int) []int {
 			return input
 		case "01":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
-			a := ind1
-			b := ind2
-			if mode1 == "0" {
-				a = input[ind1]
-			}
-			if mode2 == "0" {
-				b = input[ind2]
-			}
+			a := parseMode(mode1, relativeBase, ind1, input)
+			b := parseMode(mode2, relativeBase, ind2, input)
 			input[store] = a + b
 			i += 4
 		case "02":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
-			a := ind1
-			b := ind2
-			if mode1 == "0" {
-				a = input[ind1]
-			}
-			if mode2 == "0" {
-				b = input[ind2]
-			}
+			a := parseMode(mode1, relativeBase, ind1, input)
+			b := parseMode(mode2, relativeBase, ind2, input)
 			input[store] = a * b
 			i += 4
 		case "03":
-			store := input[i+1]
-			input[store] = readFunc()
+			ind := input[i+1]
+			a := ind
+			fmt.Printf("mode %v\n", mode1)
+			if mode1 == "2" {
+				fmt.Printf("%v\n", input[relativeBase + a])
+				input[relativeBase + a] = readFunc()
+			} else {
+				input[a] = readFunc()
+			}
 			i += 2
 		case "04":
 			store := input[i+1]
-			fmt.Printf("%v\n", input[store])
+			a := store
+			if mode1 == "2" {
+				fmt.Printf("%v\n", input[relativeBase + a])
+			} else {
+				fmt.Printf("%v\n", input[a])
+			}
 			i += 2
 		case "05":
 			ind1, ind2 := input[i+1], input[i+2]
-			a := ind1
-			b := ind2
-			if mode1 == "0" {
-				a = input[ind1]
-			}
-			if mode2 == "0" {
-				b = input[ind2]
-			}
+			a := parseMode(mode1, relativeBase, ind1, input)
+			b := parseMode(mode2, relativeBase, ind2, input)
 			if a != 0 {
 				i = b
 			} else {
@@ -100,14 +95,8 @@ func calculate(input []int) []int {
 			}
 		case "06":
 			ind1, ind2 := input[i+1], input[i+2]
-			a := ind1
-			b := ind2
-			if mode1 == "0" {
-				a = input[ind1]
-			}
-			if mode2 == "0" {
-				b = input[ind2]
-			}
+			a := parseMode(mode1, relativeBase, ind1, input)
+			b := parseMode(mode2, relativeBase, ind2, input)
 			if a == 0 {
 				i = b
 			} else {
@@ -116,14 +105,8 @@ func calculate(input []int) []int {
 		case "07":
 			// less than
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
-			a := ind1
-			b := ind2
-			if mode1 == "0" {
-				a = input[ind1]
-			}
-			if mode2 == "0" {
-				b = input[ind2]
-			}
+			a := parseMode(mode1, relativeBase, ind1, input)
+			b := parseMode(mode2, relativeBase, ind2, input)
 			if a < b {
 				input[store] = 1
 			} else {
@@ -133,14 +116,8 @@ func calculate(input []int) []int {
 		case "08":
 			// equals
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
-			a := ind1
-			b := ind2
-			if mode1 == "0" {
-				a = input[ind1]
-			}
-			if mode2 == "0" {
-				b = input[ind2]
-			}
+			a := parseMode(mode1, relativeBase, ind1, input)
+			b := parseMode(mode2, relativeBase, ind2, input)
 			if a == b {
 				input[store] = 1
 			} else {
@@ -149,11 +126,26 @@ func calculate(input []int) []int {
 			i += 4
 		case "09":
 			ind1 := input[i+1]
-			relativeBase += ind1
+			a := parseMode(mode1, relativeBase, ind1, input)
+			relativeBase += a
 			i += 2
 		default:
 			i++
 		}
 	}
 	return input
+}
+
+// return the location of the blahblabhlah?
+func parseMode(mode string, relbase, value int, input []int) int {
+	switch mode {
+	case "0":
+		return input[value]
+	case "1":
+		return value
+	case "2":
+		return input[relbase + value]
+	default:
+		panic("fubar")
+	}
 }
