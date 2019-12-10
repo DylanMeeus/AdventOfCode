@@ -36,16 +36,18 @@ func calculate(input []int) []int {
 	input = append(input, make([]int,34915192)...)
 	readFunc := func() int { return 1 }
 	var relativeBase int
+	relativeBase = 0
 	for i := 0; i < len(input); {
 		codeparam := strconv.Itoa(input[i])
 		var opcode string
-		var mode1, mode2 string
-		mode1, mode2 = "0", "0"
+		var mode1, mode2, mode3 string
+		mode1, mode2, mode3 = "0", "0", "0"
 		if len(codeparam) != 1 {
-			codeparam = "00" + codeparam
+			codeparam = "000" + codeparam
 			opcode = string(codeparam[len(codeparam)-2]) + string(codeparam[len(codeparam)-1])
 			mode1 = string(codeparam[len(codeparam)-3])
 			mode2 = string(codeparam[len(codeparam)-4])
+			mode3 = string(codeparam[len(codeparam)-5])
 		} else {
 			opcode = "0" + codeparam
 		}
@@ -56,20 +58,20 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
+			store = parseMode(mode3, relativeBase, store, input)
 			input[store] = a + b
 			i += 4
 		case "02":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
+			store = parseMode(mode3, relativeBase, store, input)
 			input[store] = a * b
 			i += 4
 		case "03":
 			ind := input[i+1]
 			a := ind
-			fmt.Printf("mode %v\n", mode1)
 			if mode1 == "2" {
-				fmt.Printf("%v\n", input[relativeBase + a])
 				input[relativeBase + a] = readFunc()
 			} else {
 				input[a] = readFunc()
@@ -79,6 +81,7 @@ func calculate(input []int) []int {
 			store := input[i+1]
 			a := store
 			if mode1 == "2" {
+				fmt.Printf("addresss.... %v\n", relativeBase+a)
 				fmt.Printf("%v\n", input[relativeBase + a])
 			} else {
 				fmt.Printf("%v\n", input[a])
@@ -107,6 +110,7 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
+			store = parseMode(mode3, relativeBase, store, input)
 			if a < b {
 				input[store] = 1
 			} else {
@@ -118,6 +122,7 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
+			store = parseMode(mode3, relativeBase, store, input)
 			if a == b {
 				input[store] = 1
 			} else {
@@ -125,9 +130,10 @@ func calculate(input []int) []int {
 			}
 			i += 4
 		case "09":
-			ind1 := input[i+1]
-			a := parseMode(mode1, relativeBase, ind1, input)
-			relativeBase += a
+			alt := parseMode(mode1, relativeBase, input[i+1], input)
+			fmt.Printf("%v\n", alt)
+			relativeBase += alt
+			fmt.Printf("rel.. %v\n",relativeBase)
 			i += 2
 		default:
 			i++
