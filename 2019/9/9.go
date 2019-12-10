@@ -42,6 +42,7 @@ func calculate(input []int) []int {
 		var opcode string
 		var mode1, mode2, mode3 string
 		mode1, mode2, mode3 = "0", "0", "0"
+		_ = mode3
 		if len(codeparam) != 1 {
 			codeparam = "000" + codeparam
 			opcode = string(codeparam[len(codeparam)-2]) + string(codeparam[len(codeparam)-1])
@@ -58,7 +59,7 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			store = parseMode(mode3, relativeBase, store, input)
+			//store = parseMode(mode3, relativeBase, store, input)
 			input[store] = a + b
 			i += 4
 		case "02":
@@ -84,8 +85,12 @@ func calculate(input []int) []int {
 			i += 2
 		case "04":
 			store := input[i+1]
-			a := parseMode(mode1, relativeBase, store, input)
-			fmt.Printf("%v\n", input[a])
+			a := store
+			if mode1 == "2" {
+				fmt.Printf("%v\n", input[relativeBase+a])
+			} else {
+				fmt.Printf("%v\n", input[a])
+			}
 			i += 2
 		case "05":
 			ind1, ind2 := input[i+1], input[i+2]
@@ -110,7 +115,7 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			store = parseMode(mode3, relativeBase, store, input)
+			//store = parseMode(mode3, relativeBase, store, input)
 			if a < b {
 				input[store] = 1
 			} else {
@@ -122,7 +127,7 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			store = parseMode(mode3, relativeBase, store, input)
+			//store = parseMode(mode3, relativeBase, store, input)
 			if a == b {
 				input[store] = 1
 			} else {
