@@ -12,7 +12,7 @@ func main() {
 }
 
 func readData() (out []int) {
-	data, err := ioutil.ReadFile("input.txt")
+	data, err := ioutil.ReadFile("test.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +33,7 @@ func solve1() {
 }
 
 func calculate(input []int) []int {
-	input = append(input, make([]int, 1187721666102244)...)
+	input = append(input, make([]int, 3000)...)
 	readFunc := func() int { return 1 }
 	var relativeBase int
 	relativeBase = 0
@@ -72,9 +72,12 @@ func calculate(input []int) []int {
 		case "03":
 			ind := input[i+1]
 			if mode1 == "2" {
+				fmt.Printf("mode 2\n")
 				input[relativeBase+input[ind]] = readFunc()
 			} else if mode1 == "1" {
+				fmt.Printf("here..\n")
 			} else {
+				fmt.Printf("mode 0\n")
 				input[ind] = readFunc()
 			}
 			i += 2
@@ -84,10 +87,10 @@ func calculate(input []int) []int {
 			if mode1 == "2" {
 				fmt.Printf("mode 2 out: %v\n", input[relativeBase+a])
 			} else if mode1 == "1" {
-				fmt.Printf("mode 1 out: %v\n", input[a])
+				fmt.Printf("mode 1 out: %v\n", store)
 			} else {
 				// mode 0
-				fmt.Printf("mode 0 %v\n", input[input[a]])
+				fmt.Printf("mode 0 %v\n", input[a])
 			}
 			i += 2
 		case "05":
