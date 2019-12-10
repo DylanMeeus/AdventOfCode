@@ -12,7 +12,7 @@ func main() {
 }
 
 func readData() (out []int) {
-	data, err := ioutil.ReadFile("test.txt")
+	data, err := ioutil.ReadFile("input.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -59,15 +59,13 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			//store = parseMode(mode3, relativeBase, store, input)
-			input[store] = a + b
+			input = storeMode(mode3, a + b,relativeBase, store, input)
 			i += 4
 		case "02":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			store = parseMode(mode3, relativeBase, store, input)
-			input[store] = a * b
+			input = storeMode(mode3, a * b,relativeBase, store, input)
 			i += 4
 		case "03":
 			ind := input[i+1]
@@ -83,6 +81,7 @@ func calculate(input []int) []int {
 			i += 2
 		case "04":
 			store := input[i+1]
+			fmt.Printf("read from.. %v\n", store)
 			a := store
 			if mode1 == "2" {
 				fmt.Printf("mode 2 out: %v\n", input[relativeBase+a])
@@ -116,11 +115,10 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			//store = parseMode(mode3, relativeBase, store, input)
 			if a < b {
-				input[store] = 1
+				input = storeMode(mode3, 1,relativeBase, store, input)
 			} else {
-				input[store] = 0
+				input = storeMode(mode3, 0,relativeBase, store, input)
 			}
 			i += 4
 		case "08":
@@ -130,9 +128,9 @@ func calculate(input []int) []int {
 			b := parseMode(mode2, relativeBase, ind2, input)
 			//store = parseMode(mode3, relativeBase, store, input)
 			if a == b {
-				input[store] = 1
+				input = storeMode(mode3, 1,relativeBase, store, input)
 			} else {
-				input[store] = 0
+				input = storeMode(mode3, 0,relativeBase, store, input)
 			}
 			i += 4
 		case "09":
@@ -155,6 +153,22 @@ func parseMode(mode string, relbase, value int, input []int) int {
 		return value
 	case "2":
 		return input[relbase+value]
+	default:
+		panic("fubar")
+	}
+}
+
+func storeMode(mode string, value, relbase, storeLocation int, input []int) []int {
+	switch mode {
+	case "0":
+		input[storeLocation] = value
+		return input
+	case "1":
+		input[input[storeLocation]] = value
+		return input
+	case "2":
+		input[input[relbase+storeLocation]] = value
+		return input
 	default:
 		panic("fubar")
 	}
