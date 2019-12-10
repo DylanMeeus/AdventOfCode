@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -17,7 +18,8 @@ func (a asteroid) String() string {
 }
 
 func main() {
-	fmt.Printf("maxtroids: %v\n", solve1(readData()))
+	//fmt.Printf("maxtroids: %v\n", solve1(readData()))
+	solve2(readData())
 }
 
 func solve1(in []asteroid) int {
@@ -34,6 +36,48 @@ func solve1(in []asteroid) int {
 	}
 	fmt.Printf("bestroid %v\n", bestroid)
 	return maxtroids
+}
+
+func solve2(in []asteroid) {
+	// find the best asteroid in the world.
+	var maxtroids int
+	var bestroid asteroid
+	for _, a := range in {
+		vis := uniqSlopes(a, in)
+		if vis > maxtroids {
+			maxtroids = vis
+			bestroid = a
+		}
+	}
+	// work with bestroid
+	// find all slopes relative to the one we have now
+	// (0,0) is bestroid
+	// map them to polar coordinates?
+	type polardroid struct {
+		ro  float64
+		phi float64
+	}
+	polardroids := []polardroid{}
+	for _, a := range in {
+		if a == bestroid {
+			continue
+		}
+		// else map to polar
+		rebasedX := a.x - bestroid.x
+		rebasedY := a.y - bestroid.y
+		r := math.Sqrt(math.Pow(float64(rebasedX), 2) + math.Pow(float64(rebasedY), 2))
+		ro := math.Atan2(float64(rebasedX), float64(rebasedY))
+		polardroids = append(polardroids, polardroid{r, ro})
+	}
+	fmt.Printf("%v\n", polardroids)
+	// rotate over them? and remove?
+	// phi -> ro
+	m := map[float64][]float64{}
+	for _, p := range polardroids {
+		m[p.phi] = append(m[p.phi], p.ro)
+	}
+	fmt.Printf("%v\n", m)
+	// sort them and loop?
 }
 
 // if multiple ones have the same slope, only count one?
@@ -61,11 +105,10 @@ func uniqSlopes(cur asteroid, others []asteroid) int {
 		s := (float64(y1) - float64(y2)) / (float64(x1) - float64(x2))
 		key := "R"
 		if x1 < x2 {
-			key="L"
+			key = "L"
 		}
-		slopes[key+fmt.Sprintf("%.3f",s)] = struct{}{}
+		slopes[key+fmt.Sprintf("%.3f", s)] = struct{}{}
 	}
-	fmt.Println(slopes)
 	count := len(slopes)
 	if up {
 		count++
