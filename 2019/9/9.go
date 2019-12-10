@@ -33,7 +33,7 @@ func solve1() {
 }
 
 func calculate(input []int) []int {
-	input = append(input, make([]int,34915192)...)
+	input = append(input, make([]int, 34915192)...)
 	readFunc := func() int { return 1 }
 	var relativeBase int
 	relativeBase = 0
@@ -70,22 +70,22 @@ func calculate(input []int) []int {
 			i += 4
 		case "03":
 			ind := input[i+1]
-			a := ind
 			if mode1 == "2" {
-				input[relativeBase + a] = readFunc()
+				fmt.Println("woop")
+				fmt.Println(ind)
+				fmt.Println(input[ind])
+				input[relativeBase+input[ind]] = readFunc()
+			} else if mode1 == "1" {
+				fmt.Println("fuck you")
 			} else {
-				input[a] = readFunc()
+				fmt.Println("woopwoop")
+				input[ind] = readFunc()
 			}
 			i += 2
 		case "04":
 			store := input[i+1]
-			a := store
-			if mode1 == "2" {
-				fmt.Printf("addresss.... %v\n", relativeBase+a)
-				fmt.Printf("%v\n", input[relativeBase + a])
-			} else {
-				fmt.Printf("%v\n", input[a])
-			}
+			a := parseMode(mode1, relativeBase, store, input)
+			fmt.Printf("%v\n", input[a])
 			i += 2
 		case "05":
 			ind1, ind2 := input[i+1], input[i+2]
@@ -131,9 +131,7 @@ func calculate(input []int) []int {
 			i += 4
 		case "09":
 			alt := parseMode(mode1, relativeBase, input[i+1], input)
-			fmt.Printf("%v\n", alt)
 			relativeBase += alt
-			fmt.Printf("rel.. %v\n",relativeBase)
 			i += 2
 		default:
 			i++
@@ -150,7 +148,7 @@ func parseMode(mode string, relbase, value int, input []int) int {
 	case "1":
 		return value
 	case "2":
-		return input[relbase + value]
+		return input[relbase+value]
 	default:
 		panic("fubar")
 	}
