@@ -3,7 +3,6 @@ package main
 import (
 	"io/ioutil"
 	"fmt"
-	"math"
 	"strings"
 )
 
@@ -26,7 +25,7 @@ func solve1(in []asteroid) int {
 	var maxtroids int
 	var bestroid asteroid
 	for _, a := range in {
-		vis := countVisible(a, in)
+		vis := uniqSlopes(a, in)
 		if vis > maxtroids {
 			maxtroids = vis
 			bestroid = a
@@ -37,49 +36,44 @@ func solve1(in []asteroid) int {
 	return maxtroids
 }
 
-func countVisible(cur asteroid, other []asteroid) (count int) {
-	for _, o := range other {
-		if isVisible(cur, o, other) {
-			count++
-		}
-	}
-	return
-}
-
 // if multiple ones have the same slope, only count one?
-func isVisible(cur, target asteroid, other []asteroid) bool {
+func uniqSlopes(cur asteroid, others []asteroid) int {
 	// make sure there is nothing between the other asteroid and ourselves
-	x1, x2 := cur.x, target.x
-	y1, y2 := cur.y, target.y
-	if x2 == x1 {
-		return traceY(cur, target, other)
-	}
-	if y2 == y1 {
-		return true
-	}
-	distanceCurTarget := math.Sqrt(math.Pow(float64(x1)-float64(x2), 2) - math.Pow(float64(y1)-float64(y2), 2))
-	s := (y1 - y2) / (x1 - x2)
-	// b = mx - y
-	startCur := (s * x1) - y1
-	for _, o := range other {
-		if o != cur && o != target {
-			if (startCur * o.x) == o.y {
-				// it's on the line.. but is it closer?
-				pow1 := math.Pow(float64(x1)-float64(o.x), 2)
-				pow2 := math.Pow(float64(y1)-float64(o.y), 2)
-				distanceCurO := math.Sqrt(pow1 - pow2)
-				if pow1-pow2 < 2 {
-					distanceCurO = 1
-				}
-				//fmt.Printf("distance: %v pow1: pow2: %v\n", distanceCurO, pow1, pow2)
-				if distanceCurO < distanceCurTarget {
-					fmt.Println("false")
-					return false
-				}
-			}
+	// float64?
+	slopes := map[string]struct{}{}
+	var up bool
+	var down bool
+	for _, target := range others {
+		if cur == target {
+			continue
 		}
+		x1, x2 := cur.x, target.x
+		y1, y2 := cur.y, target.y
+		if x1 == x2 {
+			if y1 > y2 {
+				up = true
+			}
+			if y1 < y2 {
+				down = true
+			}
+			continue
+		}
+		s := (float64(y1) - float64(y2)) / (float64(x1) - float64(x2))
+		key := "R"
+		if x1 < x2 {
+			key="L"
+		}
+		slopes[key+fmt.Sprintf("%.3f",s)] = struct{}{}
 	}
-	return true
+	fmt.Println(slopes)
+	count := len(slopes)
+	if up {
+		count++
+	}
+	if down {
+		count++
+	}
+	return count
 }
 
 func traceY(cur, target asteroid, other []asteroid) bool {
