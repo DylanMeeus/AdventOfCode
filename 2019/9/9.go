@@ -34,7 +34,7 @@ func solve1() {
 
 func calculate(input []int) []int {
 	input = append(input, make([]int, 3000)...)
-	readFunc := func() int { return 1 }
+	readFunc := func() int { return 2 }
 	var relativeBase int
 	relativeBase = 0
 	for i := 0; i < len(input); {
@@ -59,19 +59,19 @@ func calculate(input []int) []int {
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			input = storeMode(mode3, a + b,relativeBase, store, input)
+			input = storeMode(mode3, a+b, relativeBase, store, input)
 			i += 4
 		case "02":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
-			input = storeMode(mode3, a * b,relativeBase, store, input)
+			input = storeMode(mode3, a*b, relativeBase, store, input)
 			i += 4
 		case "03":
 			ind := input[i+1]
 			if mode1 == "2" {
 				fmt.Printf("mode 2\n")
-				input[relativeBase + ind] = readFunc()
+				input[relativeBase+ind] = readFunc()
 			} else if mode1 == "1" {
 				fmt.Printf("here..\n")
 			} else {
@@ -115,9 +115,9 @@ func calculate(input []int) []int {
 			a := parseMode(mode1, relativeBase, ind1, input)
 			b := parseMode(mode2, relativeBase, ind2, input)
 			if a < b {
-				input = storeMode(mode3, 1,relativeBase, store, input)
+				input = storeMode(mode3, 1, relativeBase, store, input)
 			} else {
-				input = storeMode(mode3, 0,relativeBase, store, input)
+				input = storeMode(mode3, 0, relativeBase, store, input)
 			}
 			i += 4
 		case "08":
@@ -127,9 +127,9 @@ func calculate(input []int) []int {
 			b := parseMode(mode2, relativeBase, ind2, input)
 			//store = parseMode(mode3, relativeBase, store, input)
 			if a == b {
-				input = storeMode(mode3, 1,relativeBase, store, input)
+				input = storeMode(mode3, 1, relativeBase, store, input)
 			} else {
-				input = storeMode(mode3, 0,relativeBase, store, input)
+				input = storeMode(mode3, 0, relativeBase, store, input)
 			}
 			i += 4
 		case "09":
