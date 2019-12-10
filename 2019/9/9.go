@@ -71,7 +71,7 @@ func calculate(input []int) []int {
 			ind := input[i+1]
 			if mode1 == "2" {
 				fmt.Printf("mode 2\n")
-				input[relativeBase+input[ind]] = readFunc()
+				input[relativeBase + ind] = readFunc()
 			} else if mode1 == "1" {
 				fmt.Printf("here..\n")
 			} else {
@@ -81,7 +81,6 @@ func calculate(input []int) []int {
 			i += 2
 		case "04":
 			store := input[i+1]
-			fmt.Printf("read from.. %v\n", store)
 			a := store
 			if mode1 == "2" {
 				fmt.Printf("mode 2 out: %v\n", input[relativeBase+a])
@@ -167,7 +166,7 @@ func storeMode(mode string, value, relbase, storeLocation int, input []int) []in
 		input[input[storeLocation]] = value
 		return input
 	case "2":
-		input[input[relbase+storeLocation]] = value
+		input[relbase+storeLocation] = value
 		return input
 	default:
 		panic("fubar")
