@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -32,9 +32,57 @@ func solve1() {
 	calculate(data)
 }
 
+type robot struct {
+	location point
+	rotation int // (0 up, 1 right, 2 down, 3 left)
+}
+
+type point struct {
+	x, y int
+}
+
+func (r *robot) step() {
+	// based on rotation, move robot marvin
+	switch r.rotation {
+	case 0:
+		r.location.y--
+	case 1:
+		r.location.x++
+	case 2:
+		r.location.y++
+	case 3:
+		r.location.x--
+	default:
+		panic(r.rotation)
+	}
+}
+
 func calculate(input []int) []int {
+	marvin := robot{}
 	input = append(input, make([]int, 3000)...)
-	readFunc := func() int { return 2 }
+	tiles := map[point]int{}
+	readFunc := func() int {
+		return tiles[marvin.location]
+	}
+	procColor := true
+	processOutput := func(num int) {
+		if procColor {
+			tiles[marvin.location] = num
+			procColor = false
+			return
+		}
+		// rotate marvin
+		if num == 1 {
+			marvin.rotation = (marvin.rotation + 1) % 4
+		} else {
+			marvin.rotation = (marvin.rotation - 1)
+			if marvin.rotation == -1 {
+				marvin.rotation = 3
+			}
+		}
+		marvin.step()
+		procColor = true
+	}
 	var relativeBase int
 	relativeBase = 0
 	for i := 0; i < len(input); {
@@ -54,6 +102,7 @@ func calculate(input []int) []int {
 		}
 		switch opcode {
 		case "99":
+			fmt.Printf("painted %v tiles\n", len(tiles))
 			return input
 		case "01":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
@@ -70,26 +119,29 @@ func calculate(input []int) []int {
 		case "03":
 			ind := input[i+1]
 			if mode1 == "2" {
-				fmt.Printf("mode 2\n")
 				input[relativeBase+ind] = readFunc()
 			} else if mode1 == "1" {
-				fmt.Printf("here..\n")
+				// no-op
 			} else {
-				fmt.Printf("mode 0\n")
 				input[ind] = readFunc()
 			}
 			i += 2
 		case "04":
 			store := input[i+1]
 			a := store
+			var instruction int
 			if mode1 == "2" {
-				fmt.Printf("mode 2 out: %v\n", input[relativeBase+a])
+				//fmt.Printf("mode 2 out: %v\n", input[relativeBase+a])
+				instruction = input[relativeBase+a]
 			} else if mode1 == "1" {
-				fmt.Printf("mode 1 out: %v\n", store)
+				//fmt.Printf("mode 1 out: %v\n", store)
+				instruction = store
 			} else {
 				// mode 0
-				fmt.Printf("mode 0 %v\n", input[a])
+				//fmt.Printf("mode 0 %v\n", input[a])
+				instruction = input[a]
 			}
+			processOutput(instruction)
 			i += 2
 		case "05":
 			ind1, ind2 := input[i+1], input[i+2]
