@@ -32,7 +32,6 @@ func solve1(in []asteroid) int {
 		if vis > maxtroids {
 			maxtroids = vis
 			bestroid = a
-			fmt.Printf("bestroid..%v\n", bestroid)
 		}
 	}
 	fmt.Printf("bestroid %v\n", bestroid)
@@ -70,28 +69,31 @@ func solve2(in []asteroid) {
 		r := math.Sqrt(math.Pow(float64(rebasedX), 2) + math.Pow(float64(rebasedY), 2))
 		ro := math.Atan2(float64(rebasedX), float64(rebasedY))
 		polardroids = append(polardroids, polardroid{r, ro})
-		pm[polardroid{r,ro}] = a
+		pm[polardroid{r, ro}] = a
 	}
-	fmt.Printf("%v\n", polardroids)
 	// rotate over them? and remove?
 	// phi -> ro
 	m := map[float64][]float64{}
 	for _, p := range polardroids {
 		m[p.phi] = append(m[p.phi], p.ro)
 	}
-	fmt.Printf("%v\n", m)
 	// sort them and loop?
 	// sort them first actually? (from -pi -> pi?)
 	phis := []float64{}
-	for k,_ := range m {
-		phis = append(phis,k)
+	for k, _ := range m {
+		phis = append(phis, k)
 	}
-	for _,v := range m {
+	for _, v := range m {
 		sort.Float64s(v)
 	}
-	sort.Float64s(phis)
-	fmt.Println(phis)
+	sort.Slice(phis, func(i, j int) bool {
+		return phis[i] > phis[j]
+	})
 	phii := 0
+	fmt.Printf("%v\n", phis)
+	for phis[phii] != 3.141592653589793 {
+		phii++
+	}
 	var count int
 	for {
 		curr := m[phis[phii]]
@@ -104,12 +106,22 @@ func solve2(in []asteroid) {
 			// the next one would be 100
 			distance := m[phis[phii]][0]
 			rotation := phis[phii]
-			for _,p := range polardroids {
-				if p == (polardroid{distance,rotation}) {
+			for _, p := range polardroids {
+				if p == (polardroid{distance, rotation}) {
 					fmt.Printf("%v\n", pm[p])
 				}
 			}
 			return
+		}
+		// debug
+		if false {
+			distance := m[phis[phii]][0]
+			rotation := phis[phii]
+			for _, p := range polardroids {
+				if p == (polardroid{distance, rotation}) {
+					fmt.Printf("%v\n", pm[p])
+				}
+			}
 		}
 		m[phis[phii]] = m[phis[phii]][1:]
 		phii = (phii + 1) % len(phis)
