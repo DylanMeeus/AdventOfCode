@@ -9,6 +9,7 @@ import (
 
 func main() {
 	solve1()
+	solve2()
 }
 
 func readData() (out []int) {
@@ -30,6 +31,44 @@ func readData() (out []int) {
 func solve1() {
 	data := readData()
 	calculate(data)
+}
+
+func solve2() {
+	data := readData()
+	tiles := calculate(data)
+	// plot the tiles?
+	// we need to know the min(x), max(x) and min(y), max(y) to paint
+	var minx, miny, maxx, maxy int
+	miny, minx = 10000, 10000
+	for k, _ := range tiles {
+		if k.x > maxx {
+			maxx = k.x
+		}
+		if k.x < minx {
+			minx = k.x
+		}
+		if k.y > maxy {
+			maxy = k.y
+		}
+		if k.y < miny {
+			miny = k.y
+		}
+	}
+	for y := miny; y <= maxy; y++ {
+		for x := minx; x <= maxx+20; x++ {
+			if p,ok := tiles[point{x,y}]; ok {
+				if p == 1 {
+					fmt.Print("#")
+				} else {
+					fmt.Print(".")
+				}
+			} else {
+				fmt.Print(" ")
+			}
+		}
+		fmt.Println()
+	}
+	fmt.Printf("%v %v %v %v\n", minx, maxx, miny, maxy)
 }
 
 type robot struct {
@@ -57,12 +96,14 @@ func (r *robot) step() {
 	}
 }
 
-func calculate(input []int) []int {
+func calculate(input []int) map[point]int {
 	marvin := robot{}
 	input = append(input, make([]int, 3000)...)
 	tiles := map[point]int{}
+	tiles[point{0, 0}] = 1
 	readFunc := func() int {
-		return tiles[marvin.location]
+		tile := tiles[marvin.location]
+		return tile
 	}
 	procColor := true
 	processOutput := func(num int) {
@@ -103,7 +144,7 @@ func calculate(input []int) []int {
 		switch opcode {
 		case "99":
 			fmt.Printf("painted %v tiles\n", len(tiles))
-			return input
+			return tiles
 		case "01":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
@@ -192,7 +233,7 @@ func calculate(input []int) []int {
 			i++
 		}
 	}
-	return input
+	return tiles
 }
 
 // return the location of the blahblabhlah?
