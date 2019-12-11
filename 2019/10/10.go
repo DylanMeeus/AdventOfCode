@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"math"
+	"sort"
 	"strings"
 )
 
@@ -58,6 +59,7 @@ func solve2(in []asteroid) {
 		phi float64
 	}
 	polardroids := []polardroid{}
+	pm := map[polardroid]asteroid{}
 	for _, a := range in {
 		if a == bestroid {
 			continue
@@ -68,6 +70,7 @@ func solve2(in []asteroid) {
 		r := math.Sqrt(math.Pow(float64(rebasedX), 2) + math.Pow(float64(rebasedY), 2))
 		ro := math.Atan2(float64(rebasedX), float64(rebasedY))
 		polardroids = append(polardroids, polardroid{r, ro})
+		pm[polardroid{r,ro}] = a
 	}
 	fmt.Printf("%v\n", polardroids)
 	// rotate over them? and remove?
@@ -78,6 +81,40 @@ func solve2(in []asteroid) {
 	}
 	fmt.Printf("%v\n", m)
 	// sort them and loop?
+	// sort them first actually? (from -pi -> pi?)
+	phis := []float64{}
+	for k,_ := range m {
+		phis = append(phis,k)
+	}
+	for _,v := range m {
+		sort.Float64s(v)
+	}
+	sort.Float64s(phis)
+	fmt.Println(phis)
+	phii := 0
+	var count int
+	for {
+		curr := m[phis[phii]]
+		if len(curr) == 0 {
+			// go to next
+			phii = (phii + 1) % len(phis)
+			continue
+		}
+		if count == 199 {
+			// the next one would be 100
+			distance := m[phis[phii]][0]
+			rotation := phis[phii]
+			for _,p := range polardroids {
+				if p == (polardroid{distance,rotation}) {
+					fmt.Printf("%v\n", pm[p])
+				}
+			}
+			return
+		}
+		m[phis[phii]] = m[phis[phii]][1:]
+		phii = (phii + 1) % len(phis)
+		count++
+	}
 }
 
 // if multiple ones have the same slope, only count one?
