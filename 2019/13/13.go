@@ -27,9 +27,30 @@ func readData() (out []int) {
 	return
 }
 
+type tile struct {
+	x, y, block int
+}
+
 func solve1() {
 	data := readData()
-	calculate(data)
+	output := calculate(data)
+	tiles := []tile{}
+	for i := 0; i < len(output)-4; i++ {
+		x := output[i]
+		i++
+		y := output[i]
+		i++
+		block := output[i]
+		tiles = append(tiles, tile{x, y, block})
+	}
+	const blockTile = 2
+	var out int
+	for _, t := range tiles {
+		if t.block == blockTile {
+			out++
+		}
+	}
+	fmt.Printf("%v\n", out)
 }
 
 func calculate(input []int) []int {
@@ -37,6 +58,7 @@ func calculate(input []int) []int {
 	readFunc := func() int { return 2 }
 	var relativeBase int
 	relativeBase = 0
+	out := []int{}
 	for i := 0; i < len(input); {
 		codeparam := strconv.Itoa(input[i])
 		var opcode string
@@ -54,7 +76,7 @@ func calculate(input []int) []int {
 		}
 		switch opcode {
 		case "99":
-			return input
+			return out
 		case "01":
 			ind1, ind2, store := input[i+1], input[i+2], input[i+3]
 			a := parseMode(mode1, relativeBase, ind1, input)
@@ -82,14 +104,16 @@ func calculate(input []int) []int {
 		case "04":
 			store := input[i+1]
 			a := store
+			var output int
 			if mode1 == "2" {
-				fmt.Printf("mode 2 out: %v\n", input[relativeBase+a])
+				output = input[relativeBase+a]
 			} else if mode1 == "1" {
-				fmt.Printf("mode 1 out: %v\n", store)
+				output = store
 			} else {
 				// mode 0
-				fmt.Printf("mode 0 %v\n", input[a])
+				output = input[a]
 			}
+			out = append(out, output)
 			i += 2
 		case "05":
 			ind1, ind2 := input[i+1], input[i+2]
