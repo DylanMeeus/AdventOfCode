@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	fmt.Printf("%v\n", solve1())
 	fmt.Printf("%v\n", solve2())
 }
 
@@ -32,18 +33,31 @@ func solve2() int {
 
 	for i := 0; i < len(is); i++ {
 		for j := i + 1; j < len(is); j++ {
-			for z := j + 1; z < len(is); z++ {
-				a, b, c := is[i], is[j], is[z]
-				if a+b+c == 2020 {
-					return a * b * c
-				}
+			delta := 2020 - (is[i] + is[j])
+			if binSearch(delta, is[j:]) {
+				return is[i] * is[j] * delta
 			}
 		}
 	}
 	return -1
 }
 
-func solve1() {
+func binSearch(target int, nums []int) bool {
+	lo, hi := 0, len(nums)
+	for lo <= hi {
+		mid := lo + ((hi - lo) / 2)
+		if target > nums[mid] {
+			lo = mid + 1
+		} else if target < nums[mid] {
+			hi = mid - 1
+		} else {
+			return true
+		}
+	}
+	return false
+}
+
+func solve1() int {
 	in, _ := ioutil.ReadFile("input.txt")
 	nums := map[int]bool{}
 	parts := strings.Split(string(in), "\n")
@@ -54,11 +68,10 @@ func solve1() {
 		}
 		delta := 2020 - i
 		if _, ok := nums[delta]; ok {
-			result := delta * i
-			fmt.Printf("%v\n", result)
+			return delta * i
 		}
 		nums[i] = true
 	}
 
-	fmt.Println("done")
+	return -1
 }
