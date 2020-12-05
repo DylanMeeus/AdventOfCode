@@ -1,6 +1,6 @@
-[0m[[0m[0mdebug[0m] [0m[0m> Exec(run, Some(c194c1af-5ad4-4de9-85ea-6e530faea27a), Some(CommandSource(console0)))[0m
+[0m[[0m[0mdebug[0m] [0m[0m> Exec(run, Some(53febc13-72e5-47c9-adad-4cde63a8c68b), Some(CommandSource(console0)))[0m
 [0m[[0m[0mdebug[0m] [0m[0mEvaluating tasks: Compile / run[0m
 [0m[[0m[0mdebug[0m] [0m[0mRunning task... Cancel: Signal, check cycles: false, forcegc: true[0m
 [0m[[0m[0minfo[0m] [0m[0mcompiling 1 Scala source to /home/dylan/Development/Code/AoC/2020/5/target/scala-2.12/classes ...[0m
-[0m[[0m[32msuccess[0m] [0m[0mTotal time: 0 s, completed Dec 5, 2020 5:34:00 PM[0m
+[0m[[0m[32msuccess[0m] [0m[0mTotal time: 0 s, completed Dec 5, 2020 5:45:54 PM[0m
 [0m[[0m[0mdebug[0m] [0m[0m> Exec(shell, None, None)[0m
