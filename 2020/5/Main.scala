@@ -18,19 +18,40 @@ object Main extends App {
     return out
   }
 
-
-  var maxID = 0
-  var seatSet = SortedSet(0)
-  // read file
-  val file = "input.txt"
-  for (line <- Source.fromFile(file).getLines) {
-    val seatID = toNumber(line)
-    seatSet = seatSet + seatID
-    if (seatID > maxID) {
-      maxID = seatID
+  def solve1(): Int = {
+    var maxID = 0
+    // read file
+    val file = "input.txt"
+    for (line <- Source.fromFile(file).getLines) {
+      val seatID = toNumber(line)
+      if (seatID > maxID) {
+        maxID = seatID
+      }
     }
+    return maxID
+
   }
-  println(maxID)
+
+  def solve2(max: Int): Int = {
+    var seatSet = SortedSet(0)
+    val file = "input.txt"
+    for (line <- Source.fromFile(file).getLines) {
+      val seatID = toNumber(line)
+      seatSet = seatSet + seatID
+    }
+
+    for (i <- 1 until max) {
+      if (seatSet.contains(i - 1) && seatSet.contains(i + 1) && !seatSet.contains(i)) {
+        return i
+      }
+    }
+    return 0
+  }
+
+  val max = solve1()
+  val missing = solve2(max)
+  println(max)
+  println(missing)
 }
 
 
