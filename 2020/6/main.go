@@ -6,8 +6,14 @@ import (
 	"strings"
 )
 
+type Group struct {
+	Answer string
+	Len    int
+}
+
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
 }
 
 func solve1() int {
@@ -16,13 +22,41 @@ func solve1() int {
 
 	out := 0
 	for _, g := range groups {
-		if g == "" {
+		if g.Answer == "" {
 			continue
 		}
-		out += countDistinct(g)
+		out += countDistinct(g.Answer)
 	}
 
 	return out
+}
+
+func solve2() int {
+	in := getInput()
+	groups := reduce(in)
+
+	out := 0
+	for _, g := range groups {
+		if g.Answer == "" {
+			continue
+		}
+		freq := countFreq(g.Answer)
+		for _, v := range freq {
+			if v == g.Len {
+				out++
+			}
+		}
+	}
+
+	return out
+}
+
+func countFreq(ss string) map[string]int {
+	m := map[string]int{}
+	for _, s := range ss {
+		m[string(s)]++
+	}
+	return m
 }
 
 func countDistinct(ss string) (out int) {
@@ -33,15 +67,18 @@ func countDistinct(ss string) (out int) {
 	return len(m)
 }
 
-func reduce(in []string) []string {
+func reduce(in []string) []Group {
 	current := in[0]
-	out := []string{}
+	out := []Group{}
+	size := 1
 	for i := 1; i < len(in); i++ {
 		if in[i] == "" {
-			out = append(out, current)
+			out = append(out, Group{current, size})
+			size = 0
 			current = ""
 		} else {
 			current += in[i]
+			size++
 		}
 	}
 	return out
