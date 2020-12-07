@@ -3,17 +3,24 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"strings"
 )
 
+type Node struct {
+	ID    string
+	Value int
+}
+
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
 }
 
 func solve1() int {
 	target := "shinygold"
 	input := getInput()
-	adj := map[string][]string{}
+	adj := map[string][]Node{}
 	for _, line := range input {
 		if line == "" {
 			continue
@@ -34,9 +41,41 @@ func solve1() int {
 	return out
 }
 
-// how many bags can be reduced to this one
+func solve2() int {
+	target := "shinygold"
+	input := getInput()
+	adj := map[string][]Node{}
+	for _, line := range input {
+		if line == "" {
+			continue
+		}
+		parse(line, adj)
+	}
 
-func canReach(node, target string, adj map[string][]string) bool {
+	out := traverse(target, adj)
+
+	return out
+}
+
+// how many bags can be reduced to this one
+func traverse(node string, adj map[string][]Node) int {
+	if adj[node] == nil {
+		return 0
+	}
+	cost := 0
+	for _, child := range adj[node] {
+		childcost := child.Value
+		inner := traverse(child.ID, adj)
+		if inner != 0 {
+			cost += childcost * inner
+		}
+		cost += childcost
+	}
+	return cost
+
+}
+
+func canReach(node, target string, adj map[string][]Node) bool {
 	if adj[node] == nil {
 		return false
 	}
@@ -45,7 +84,7 @@ func canReach(node, target string, adj map[string][]string) bool {
 	}
 
 	for _, child := range adj[node] {
-		if canReach(child, target, adj) {
+		if canReach(child.ID, target, adj) {
 			return true
 		}
 	}
@@ -53,21 +92,27 @@ func canReach(node, target string, adj map[string][]string) bool {
 	return false
 }
 
-func parse(s string, adj map[string][]string) {
+func parse(s string, adj map[string][]Node) {
 	words := strings.Split(s, " ")
 	parent := words[0] + words[1]
 	remainder := words[2:]
 	// see them in groups of two
 	child := ""
-	children := []string{}
+	count := 0
+	children := []Node{}
 	for _, rem := range remainder {
+		if strings.ContainsAny(rem, "0123456789") {
+			i, _ := strconv.Atoi(rem)
+			count = i
+		}
 		if !strings.ContainsAny(rem, "0123456789,") && !strings.Contains(rem, "contain") && !strings.Contains(rem, "bag") &&
 			!strings.Contains(rem, "bags") {
 			if child == "" {
 				child += rem
 			} else {
 				child += rem
-				children = append(children, child)
+				node := Node{child, count}
+				children = append(children, node)
 				child = ""
 			}
 
