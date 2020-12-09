@@ -9,6 +9,48 @@ import (
 
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
+}
+
+func solve2() int {
+	key := solve1()
+	nums := getInput()
+
+	// find contigious set which sums to this..
+
+	for i := 0; i < len(nums); i++ {
+		sum := 0
+		is := []int{}
+		for j := i; j < len(nums); j++ {
+			is = append(is, nums[j])
+			sum += nums[j]
+			if sum == key && len(nums) > 2 {
+				return min(is) + max(is)
+			}
+		}
+	}
+
+	return -1
+}
+
+func min(is []int) int {
+	m := is[0]
+
+	for _, i := range is {
+		if i < m {
+			m = i
+		}
+	}
+	return m
+}
+
+func max(is []int) (out int) {
+	for _, i := range is {
+		if i > out {
+			out = i
+		}
+	}
+	return
 }
 
 func solve1() int {
