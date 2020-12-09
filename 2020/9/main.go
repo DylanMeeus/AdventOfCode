@@ -17,7 +17,6 @@ func solve2() int {
 	nums := getInput()
 
 	// find contigious set which sums to this..
-
 	for i := 0; i < len(nums); i++ {
 		sum := 0
 		is := []int{}
@@ -26,6 +25,9 @@ func solve2() int {
 			sum += nums[j]
 			if sum == key && len(nums) > 2 {
 				return min(is) + max(is)
+			}
+			if sum > key {
+				break
 			}
 		}
 	}
