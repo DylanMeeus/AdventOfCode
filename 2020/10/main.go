@@ -19,14 +19,11 @@ func solve2() int {
 	is := append([]int{0}, getInput()...)
 	sort.Slice(is, func(i, j int) bool { return is[i] < is[j] })
 	is = append(is, is[len(is)-1]+3)
-	var arrange func(int, []int, []int, map[int]int) int
-	arrange = func(current int, remainder []int, path []int, memo map[int]int) int {
+	var arrange func(int, []int, map[int]int) int
+	arrange = func(current int, remainder []int, memo map[int]int) int {
 		if val, ok := memo[current]; ok {
 			return val
 		}
-		cp := make([]int, len(path))
-		copy(cp, path)
-		cp = append(cp, current)
 		if len(remainder) == 0 {
 			return 1
 		}
@@ -41,7 +38,7 @@ func solve2() int {
 				c := make([]int, len(remainder))
 				copy(c, remainder)
 				c = c[i+1:]
-				ways := arrange(rem, c, cp, memo)
+				ways := arrange(rem, c, memo)
 				total += ways
 				memo[rem] = ways
 			} else {
@@ -53,17 +50,8 @@ func solve2() int {
 		}
 		return memo[current]
 	}
-	result := arrange(is[0], is[1:], []int{}, map[int]int{})
+	result := arrange(is[0], is[1:], map[int]int{})
 	return result
-}
-
-func filter(is []int, x int) (out []int) {
-	for _, i := range is {
-		if i != x {
-			out = append(out, i)
-		}
-	}
-	return
 }
 
 func solve1() int {
