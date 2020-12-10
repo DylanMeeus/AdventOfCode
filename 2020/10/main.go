@@ -19,22 +19,21 @@ func solve2() int {
 	is := append([]int{0}, getInput()...)
 	sort.Slice(is, func(i, j int) bool { return is[i] < is[j] })
 	is = append(is, is[len(is)-1]+3)
-	possible := 0
-	paths := [][]int{}
-	var arrange func(int, []int, []int)
-	arrange = func(current int, remainder []int, path []int) {
-		sort.Slice(remainder, func(i, j int) bool { return remainder[i] < remainder[j] })
+	var arrange func(int, []int, []int, map[int]int) int
+	arrange = func(current int, remainder []int, path []int, memo map[int]int) int {
+		if val, ok := memo[current]; ok {
+			return val
+		}
 		cp := make([]int, len(path))
 		copy(cp, path)
 		cp = append(cp, current)
 		if len(remainder) == 0 {
-			possible++
-			paths = append(paths, cp)
-			return
+			return 1
 		}
 		if remainder[0] > current+3 {
-			return
+			return 0
 		}
+		total := 0
 		for i, rem := range remainder {
 			delta := int(math.Abs(float64(rem - current)))
 			if delta <= 3 {
@@ -42,15 +41,20 @@ func solve2() int {
 				c := make([]int, len(remainder))
 				copy(c, remainder)
 				c = c[i+1:]
-				arrange(rem, c, cp)
+				ways := arrange(rem, c, cp, memo)
+				total += ways
+				memo[rem] = ways
 			} else {
-				//break
+				break
 			}
 		}
-
+		if _, ok := memo[current]; !ok {
+			memo[current] = total
+		}
+		return memo[current]
 	}
-	arrange(is[0], is[1:], []int{})
-	return possible
+	result := arrange(is[0], is[1:], []int{}, map[int]int{})
+	return result
 }
 
 func filter(is []int, x int) (out []int) {
