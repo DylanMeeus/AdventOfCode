@@ -12,7 +12,6 @@ import (
 func main() {
 	fmt.Printf("%v\n", solve1())
 	fmt.Printf("part2: %v\n", solve2())
-	fmt.Println("done")
 }
 
 func solve2() int {
@@ -61,7 +60,6 @@ func solve1() int {
 	// find all the differences
 	j1, j3 := 0, 1
 
-	fmt.Printf("%v\n", is)
 	for i := 0; i < len(is)-1; i++ {
 		delta := is[i+1] - is[i]
 		if delta == 1 {
