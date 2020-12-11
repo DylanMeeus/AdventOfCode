@@ -41,8 +41,6 @@ func solve1() int {
 
 func solve2() int {
 	grid := getInput()
-
-	c := 0
 	for {
 		newgrid, changed := timeStep2(grid)
 		grid = newgrid
@@ -57,11 +55,6 @@ func solve2() int {
 			}
 			return count
 		}
-		if c == 3 {
-			fmt.Printf("grid: %v\n", grid)
-			break
-		}
-		c++
 	}
 
 	return 0
@@ -94,8 +87,8 @@ func timeStep2(grid [][]string) ([][]string, int) {
 // count seats in Line Of Sight
 func seatsInLOS(row, col int, grid [][]string) int {
 	out := 0
-	// up
-	for i := row + 1; i < len(grid)-1; i++ {
+	// down
+	for i := row + 1; i < len(grid); i++ {
 		if grid[i][col] == FLOOR {
 			continue
 		}
@@ -116,7 +109,7 @@ func seatsInLOS(row, col int, grid [][]string) int {
 	}
 
 	// left
-	for j := col + 1; j < len(grid[row])-1; j++ {
+	for j := col + 1; j < len(grid[row]); j++ {
 		if grid[row][j] == FLOOR {
 			continue
 		}
@@ -139,7 +132,7 @@ func seatsInLOS(row, col int, grid [][]string) int {
 	// diagonals
 
 	j := col + 1
-	for i := row + 1; i < len(grid)-1; i++ {
+	for i := row + 1; i < len(grid); i++ {
 		if j > len(grid[row])-1 {
 			break
 		}
@@ -154,7 +147,7 @@ func seatsInLOS(row, col int, grid [][]string) int {
 	}
 
 	j = col - 1
-	for i := row + 1; i < len(grid)-1; i++ {
+	for i := row + 1; i < len(grid); i++ {
 		if j < 0 {
 			break
 		}
@@ -272,7 +265,7 @@ func countOccupied(row, col int, grid [][]string) (out int) {
 }
 
 func getInput() [][]string {
-	in, _ := ioutil.ReadFile("test.txt")
+	in, _ := ioutil.ReadFile("input.txt")
 
 	out := [][]string{}
 	for _, line := range strings.Split(string(in), "\n") {
