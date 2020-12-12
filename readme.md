@@ -8,5 +8,5 @@ Advent of Code
 * Haskell
 * Common Lisp
 * Scala
-* Ruby
+* Crystal
 
