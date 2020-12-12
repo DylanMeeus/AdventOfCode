@@ -9,11 +9,11 @@ class Instruction(dir: String, amount: Int) {
   var value: Int = amount 
 }
 
+// Ship for part 1
 class Ship() {
   var x: Int = 0
   var y: Int = 0
   var direction: Int = 1
-
   val directions = Map(0 -> "N",1 -> "E",2 -> "S",3 -> "W")
   
   def process(input: Instruction) {
@@ -54,6 +54,7 @@ class Ship() {
 }
 
 
+// For part 2
 class ShipWaypoint() {
   var waypoint_x = 10
   var waypoint_y = 1
@@ -79,7 +80,6 @@ class ShipWaypoint() {
   def moveShip(times: Int) {
     ship_x = ship_x + (waypoint_x * times)
     ship_y = ship_y + (waypoint_y * times)
-    printf("ship: %d %d\n", ship_x, ship_y)
   }
 
   def turn(degrees: Int) {
@@ -113,7 +113,6 @@ class ShipWaypoint() {
       case "S" => waypoint_y = waypoint_y - in.value 
       case "W" => waypoint_x = waypoint_x - in.value
     }
-    printf("%d %d\n", waypoint_x, waypoint_y)
   }
 
   def manhattan(): Int = {
@@ -123,9 +122,7 @@ class ShipWaypoint() {
 
 
 object Main extends App {
-
   def getInput(): List[Instruction] = { 
-
     var instructions = new ListBuffer[Instruction]()
     val file = "input.txt"
     for (line <- Source.fromFile(file).getLines) {
@@ -166,6 +163,4 @@ object Main extends App {
 
   println(solve1())
   println(solve2())
-  
-
 }

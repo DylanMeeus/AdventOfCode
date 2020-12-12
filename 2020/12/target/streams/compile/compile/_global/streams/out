@@ -1,0 +1,6 @@
+[0m[[0m[31merror[0m] [0m[0m/home/dylan/Development/Code/AoC/2020/12/Main.scala:89:36: type mismatch;[0m
+[0m[[0m[31merror[0m] [0m[0m found   : String[0m
+[0m[[0m[31merror[0m] [0m[0m required: Int[0m
+[0m[[0m[31merror[0m] [0m[0m    waypoint_direction = directions((waypoint_direction + amount) % 4)[0m
+[0m[[0m[31merror[0m] [0m[0m                                   ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m

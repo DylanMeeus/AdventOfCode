@@ -1,0 +1,17 @@
+[0m[[0m[0mdebug[0m] [0m[0mPackaging /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/root-12_2.12-0.1.0-SNAPSHOT.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	main[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/classes/main[0m
+[0m[[0m[0mdebug[0m] [0m[0m	main/ShipWaypoint.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/classes/main/ShipWaypoint.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	main/Ship.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/classes/main/Ship.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	main/Instruction.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/classes/main/Instruction.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	main/Main$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/classes/main/Main$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	main/Main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/classes/main/Main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	main/Main$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/dylan/Development/Code/AoC/2020/12/target/scala-2.12/classes/main/Main$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone packaging.[0m
