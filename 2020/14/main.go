@@ -47,9 +47,6 @@ func solve2() int {
 		out += toValue(reg)
 	}
 
-	// sum all registers
-
-	// binary to int
 	return out
 }
 
@@ -65,10 +62,8 @@ func solve1() int {
 		parts := strings.Split(line, "=")
 		if strings.Contains(line, "mem") {
 			loc := extractMemloc(parts[0])
-			//fmt.Printf("mem loc: %v\n", loc)
 			svalue := strings.TrimSpace(parts[1])
 			ival, _ := strconv.Atoi(svalue)
-			// turn it into binary and write it
 			memmap[loc] = applyMask(toMemory(ival), mask)
 
 		} else {
@@ -81,10 +76,6 @@ func solve1() int {
 	for _, reg := range memmap {
 		out += toValue(reg)
 	}
-
-	// sum all registers
-
-	// binary to int
 	return out
 }
 
