@@ -10,6 +10,47 @@ import (
 
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
+}
+
+func solve2() int {
+	lines := getInput()
+
+	mask := ""
+	memmap := map[int][36]int{}
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		parts := strings.Split(line, "=")
+		if strings.Contains(line, "mem") {
+			oloc := extractMemloc(parts[0])
+			allLocs := applyQuantumMask(toMemory(oloc), mask)
+			_ = allLocs
+			//fmt.Printf("mem loc: %v\n", loc)
+			svalue := strings.TrimSpace(parts[1])
+			ival, _ := strconv.Atoi(svalue)
+			// turn it into binary and write it
+			for _, rloc := range allLocs {
+				loc := toValue(rloc)
+				memmap[loc] = toMemory(ival)
+			}
+
+		} else {
+			// apply mask
+			mask = strings.TrimSpace(parts[1])
+		}
+	}
+
+	out := 0
+	for _, reg := range memmap {
+		out += toValue(reg)
+	}
+
+	// sum all registers
+
+	// binary to int
+	return out
 }
 
 func solve1() int {
@@ -73,6 +114,52 @@ func toMemory(i int) [36]int {
 
 	}
 
+	return out
+}
+
+// each bit is in all possible states :-)
+func applyQuantumMask(result [36]int, mask string) [][36]int {
+	masks := []string{}
+	var generate func(int, string, string)
+	generate = func(position int, current, remainder string) {
+		if len(remainder) == 0 {
+			masks = append(masks, current)
+			return
+		}
+		var head, tail string
+		head = string(remainder[0])
+		if len(remainder) > 1 {
+			tail = remainder[1:]
+		}
+		// appending depends on head
+
+		if head == "1" {
+			generate(position+1, current+"1", tail)
+		} else if head == "0" {
+			generate(position+1, current+fmt.Sprintf("%v", result[position]), tail)
+		} else {
+			generate(position+1, current+"1", tail)
+			generate(position+1, current+"0", tail)
+		}
+	}
+
+	generate(0, "", mask)
+
+	out := [][36]int{}
+	for _, mask := range masks {
+		x := [36]int{}
+		//fmt.Printf("%v - %v\n", mask, len(mask))
+		// turn the mask into an int slice
+		for i, s := range mask {
+			if string(s) == "1" {
+				x[i] = 1
+			} else {
+				x[i] = 0
+			}
+		}
+		out = append(out, x)
+
+	}
 	return out
 }
 
