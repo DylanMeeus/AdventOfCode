@@ -10,23 +10,6 @@ import (
 func main() {
 	fmt.Printf("%v\n", solve1())
 	fmt.Printf("%v\n", solve2())
-
-	/*
-		x := 1
-
-		start := 19
-		for {
-			part1 := ((start * x) + 2) % 37
-			part2 := ((17 * x) + 3) % 19
-
-			if res == 0 {
-				fmt.Printf("res: %v\n", x*17)
-				break
-			}
-			x++
-		}
-
-	*/
 }
 
 func solve1() int {
@@ -51,19 +34,9 @@ func solve1() int {
 }
 
 func solve2() int {
-	// we try to look for a timestamp when two busses depart at the same time?
 	_, busses := getInput()
 
-	// we have to find a timestamp at which each bus arrives at the correct 'tick'
-	// the X means no bus needs to arrive at that time
-	// the order needs to stay the same
-
-	// we have to find an X such that (first * x) + offset = bus
-
-	//iter := 5263157894736
-
 	start := busses[0]
-
 	soFar := []int{busses[0]}
 	for _, bus := range busses[1:] {
 		time := findAllignmentTime(soFar, bus, start)
