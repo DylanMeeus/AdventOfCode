@@ -11,6 +11,7 @@ import (
 var (
 	rulergx   = regexp.MustCompile("[0-9]*-[0-9]*")
 	my_ticket = ticket{values: []int{79, 193, 53, 97, 137, 179, 131, 73, 191, 139, 197, 181, 67, 71, 211, 199, 167, 61, 59, 127}}
+	//my_ticket = ticket{values: []int{11, 12, 13}}
 )
 
 type ticket struct {
@@ -66,55 +67,144 @@ func solve1() (int, []ticket) {
 }
 
 func solve2() int {
+	// divide & conquer
+	// find solution for first half, second half, merge solutions
 	// first filter for valid tickets
 	_, validTickets := solve1()
 	validTickets = append(validTickets, my_ticket)
 	rules := getRules()
 
-	fmt.Printf("%v\n", recursiveMatch(rules, validTickets))
-	return 0
-
-	ruleFieldMap := map[string]int{}
-	for _, rule := range rules {
-		res := findMatchingField(rule, validTickets)
-		ruleFieldMap[rule.name] = res
-	}
-
-	fmt.Printf("%v\n", ruleFieldMap)
-	// we have to map rules to a corresponding value
-
-	return 0
+	return recursiveRemove(rules, validTickets)
 }
 
-func recursiveMatch(rules []rule, tickets []ticket) []int {
-	fieldOrder := []int{}
-	N := len(tickets[0].values) - 1
+func recursiveRemove(rules []rule, tickets []ticket) int {
+	fieldMap := map[string][]int{}
 
-	var backtrack func(fields []int) bool
-	backtrack = func(fields []int) bool {
-		if len(fields) == len(tickets[0].values) {
-			fieldOrder = fields
-			return true
+	nameValidMap := map[string]map[int]bool{}
+	for _, rule := range rules {
+		valid := map[int]bool{}
+		for _, r := range rule.ranges {
+			for s := r.start; s <= r.end; s++ {
+				valid[s] = true
+			}
 		}
+		nameValidMap[rule.name] = valid
+	}
+	for _, rule := range rules {
+		for i := 0; i < len(tickets[0].values); i++ {
+			if allMatch(rule, tickets, i, nameValidMap) {
+				fieldMap[rule.name] = append(fieldMap[rule.name], i)
+			}
+		}
+	}
 
-		for i := 0; i < N; i++ {
-			if !contains(fields, i) {
-				for _, r := range rules {
-					if allMatch(r, tickets, i) {
-						cp := make([]int, len(fields))
-						copy(cp, fields)
-						cp = append(cp, i)
-						if backtrack(cp) {
-							return true
+	fmt.Printf("%v\n", fieldMap)
+
+	for {
+
+		changed := false
+		for rule, values := range fieldMap {
+			if len(values) == 1 {
+				// remove this value from all other rules
+				for otherrule, othervalues := range fieldMap {
+					if contains(othervalues, values[0]) {
+						if rule != otherrule {
+							fieldMap[otherrule] = filter(fieldMap[otherrule], values[0])
+							changed = true
 						}
 					}
 				}
 			}
 		}
-		return false
-
+		if !changed {
+			break
+		}
 	}
-	backtrack([]int{})
+
+	// now build the possibilities (permutations) of these values?
+
+	// filter the ones that do not match..
+	// and then find a line that is unique?
+
+	result := 1
+	for rule, value := range fieldMap {
+		if strings.Contains(rule, "departure") {
+			result *= my_ticket.values[value[0]]
+		}
+	}
+
+	return result
+}
+
+func filter(is []int, i int) (out []int) {
+	for _, x := range is {
+		if i != x {
+			out = append(out, x)
+		}
+	}
+	return
+
+}
+
+func recursiveMatch(rules []rule, tickets []ticket) [][]int {
+	fieldOrder := [][]int{}
+
+	nameValidMap := map[string]map[int]bool{}
+	for _, rule := range rules {
+		valid := map[int]bool{}
+		for _, r := range rule.ranges {
+			for s := r.start; s <= r.end; s++ {
+				valid[s] = true
+			}
+		}
+		nameValidMap[rule.name] = valid
+	}
+
+	type memos struct {
+		name  string
+		field int
+	}
+
+	memo := map[memos]bool{}
+
+	var backtrack func(fields []int, remainder []rule) bool
+	backtrack = func(fields []int, remainder []rule) bool {
+		if len(remainder) == 0 {
+			c := make([]int, len(fields))
+			copy(c, fields)
+			fieldOrder = append(fieldOrder, c)
+			return true
+		}
+
+		head := remainder[0]
+		var tail []rule
+		if len(remainder) > 1 {
+			tail = remainder[1:]
+		}
+
+		for field := 0; field < len(tickets[0].values); field++ {
+			if !contains(fields, field) {
+				if valid, ok := memo[memos{head.name, field}]; ok && !valid {
+					continue
+				}
+				if memo[memos{head.name, field}] || allMatch(head, tickets, field, nameValidMap) {
+					memo[memos{head.name, field}] = true
+					//fmt.Printf("rule: %v matches %v\n", head.name, field)
+					cp := make([]int, len(fields))
+					copy(cp, fields)
+					cp = append(cp, field)
+					if backtrack(cp, tail) {
+						return true
+					}
+				} else {
+					memo[memos{head.name, field}] = false
+				}
+			}
+
+		}
+		return false
+	}
+	backtrack([]int{}, rules)
 	return fieldOrder
 
 }
@@ -128,26 +218,9 @@ func contains(is []int, i int) bool {
 	return false
 }
 
-func findMatchingField(r rule, others []ticket) int {
-	N := len(others[0].values) - 1
-
-	for i := 0; i < N; i++ {
-		if allMatch(r, others, i) {
-			return i
-		}
-	}
-	return -1
-}
-
-func allMatch(rule rule, others []ticket, field int) bool {
-	valid := map[int]bool{}
-	for _, r := range rule.ranges {
-		for s := r.start; s < r.end; s++ {
-			valid[s] = true
-		}
-	}
+func allMatch(rule rule, others []ticket, field int, valid map[string]map[int]bool) bool {
 	for _, ticket := range others {
-		if _, ok := valid[ticket.values[field]]; !ok {
+		if _, ok := valid[rule.name][ticket.values[field]]; !ok {
 			return false
 		}
 
