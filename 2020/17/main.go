@@ -12,9 +12,32 @@ const (
 	ITERATIONS = 6
 )
 
-// layer is a 2-d slice of the world?
+/*
+var directions = []point{
+	{0, 0, 1},
+	{0, 1, 0},
+	{1, 0, 0},
+	{1, 0, 1},
+	{0, 1, 1},
+	// and now negative
+	{0, 0, -1},
+	{0, -1, 0},
+	{-1, 0, 0},
+	{-1, 0, -1},
+	{0, -1, -1},
+	//
+	{1, 0, -1},
+	{0, 1, -1},
+	{-1, 0, 1},
+	{0, -1, 1},
+}
+*/
+
+type point struct {
+	x, y, z int
+}
+
 type layer struct {
-	idx  int // layer index? Maybe store the layers in a LinkedList??
 	grid [][]bool
 }
 
@@ -25,80 +48,86 @@ func main() {
 func solve1() int {
 	baseLayer := getInput()
 
-	baseLayer = pad(baseLayer)
-	fmt.Printf("%v\n", baseLayer)
-	return 1
+	field := map[point]bool{}
 
-	// create the first layer?
-	layers := make([]layer, 1+ITERATIONS)
-	layers[len(layers)/2] = baseLayer
+	n := len(baseLayer.grid) + (ITERATIONS)
 
-	for i := 0; i < ITERATIONS; i++ {
-		layers = timeStep(layers)
-		fmt.Printf("%v\n", layers)
+	for z := -n; z < n; z++ {
+		for y := -n; y < n; y++ {
+			for x := -n; x < n; x++ {
+				field[point{x, y, z}] = false
+			}
+		}
 	}
 
-	return 1
+	for row := range baseLayer.grid {
+		for col := range baseLayer.grid[row] {
+			field[point{row, col, 0}] = baseLayer.grid[row][col]
+		}
+	}
+
+	// we need space to grow into :-)
+
+	for i := 0; i < ITERATIONS; i++ {
+		field = timeStep(field)
+	}
+
+	activos := 0
+
+	fmt.Printf("%v\n", field)
+	for _, v := range field {
+		if v {
+			activos++
+		}
+	}
+
+	return activos
 }
 
 // timeStep does one 'tick' to the next state
-func timeStep(layers []layer) []layer {
+func timeStep(field map[point]bool) map[point]bool {
 	// work on a copy?
-	cl := copyLayers(layers)
+	cf := copyField(field)
 
-	for _, layer := range cl {
-		for row := range layer.grid {
-			for col := range layer.grid[row] {
-				count := countNeighbours(row, col, layer.idx, layers)
-				fmt.Printf("%v\n", count)
+	for point, state := range field {
+		n := countNeighbours(point, field)
+		if state == ACTIVE && (n != 2 && n != 3) {
+			cf[point] = INACTIVE
+		} else if state == INACTIVE && n == 3 {
+			cf[point] = ACTIVE
+		}
+	}
+
+	return cf
+}
+
+func countNeighbours(p point, field map[point]bool) (out int) {
+	// any of their coordinates differ by at most 1
+	for x := p.x - 1; x <= p.x+1; x++ {
+		for y := p.y - 1; y <= p.y+1; y++ {
+			for z := p.z - 1; z <= p.z+1; z++ {
+				neighbour := point{x, y, z}
+				if neighbour != p && field[neighbour] {
+					out++
+				}
+
 			}
 		}
 	}
-	return cl
+	return
 }
 
-// add some padding to the grid
-func pad(input layer) layer {
-	padding := make([][]bool, 3)
-	rowPadding := make([]bool, 3)
-	for row := range input.grid {
-		input.grid[row] = append(rowPadding, input.grid[row]...)
-		input.grid[row] = append(input.grid[row], rowPadding...)
+func copyField(input map[point]bool) map[point]bool {
+	out := map[point]bool{}
+	for k, v := range input {
+		out[k] = v
 	}
-	// should we extend them appropriately?
-	input.grid = append(padding, input.grid...)
-	input.grid = append(input.grid, padding...)
-	return input
-}
-
-func countNeighbours(x, y, z int, layers []layer) int {
-
-	return 0
-}
-
-// do a deep-copy
-func copyLayers(layers []layer) []layer {
-	out := []layer{}
-
-	for _, l := range layers {
-		newLayer := layer{}
-		newLayer.grid = make([][]bool, len(l.grid))
-		for i := 0; i < len(l.grid); i++ {
-			newLayer.grid[i] = make([]bool, len(l.grid[i]))
-			for j := 0; j < len(l.grid[i]); j++ {
-				newLayer.grid[i][j] = l.grid[i][j]
-			}
-		}
-		out = append(out, newLayer)
-
-	}
-
 	return out
 }
 
 // getInput returns the input as a layer
 func getInput() layer {
-	in, _ := ioutil.ReadFile("test.txt")
+	in, _ := ioutil.ReadFile("input.txt")
 	l := layer{}
 	lines := strings.Split(string(in), "\n")
 	l.grid = make([][]bool, (len(lines) - 1))
