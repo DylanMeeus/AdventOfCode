@@ -37,12 +37,17 @@ type point struct {
 	x, y, z int
 }
 
+type hyperpoint struct {
+	x, y, z, w int
+}
+
 type layer struct {
 	grid [][]bool
 }
 
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
 }
 
 func solve1() int {
@@ -74,7 +79,6 @@ func solve1() int {
 
 	activos := 0
 
-	fmt.Printf("%v\n", field)
 	for _, v := range field {
 		if v {
 			activos++
@@ -101,6 +105,81 @@ func timeStep(field map[point]bool) map[point]bool {
 	return cf
 }
 
+// timeStep does one 'tick' to the next state
+func hyperTimestep(field map[hyperpoint]bool) map[hyperpoint]bool {
+	// work on a copy?
+	cf := hyperCopy(field)
+
+	for point, state := range field {
+		n := hyperCount(point, field)
+		if state == ACTIVE && (n != 2 && n != 3) {
+			cf[point] = INACTIVE
+		} else if state == INACTIVE && n == 3 {
+			cf[point] = ACTIVE
+		}
+	}
+
+	return cf
+}
+
+func solve2() int {
+	baseLayer := getInput()
+
+	field := map[hyperpoint]bool{}
+
+	n := len(baseLayer.grid) + (ITERATIONS)
+
+	for z := -n; z < n; z++ {
+		for y := -n; y < n; y++ {
+			for x := -n; x < n; x++ {
+				for w := -n; w < n; w++ {
+					field[hyperpoint{x, y, z, w}] = false
+				}
+			}
+		}
+	}
+
+	for row := range baseLayer.grid {
+		for col := range baseLayer.grid[row] {
+			field[hyperpoint{row, col, 0, 0}] = baseLayer.grid[row][col]
+		}
+	}
+
+	// we need space to grow into :-)
+
+	for i := 0; i < ITERATIONS; i++ {
+		field = hyperTimestep(field)
+	}
+
+	activos := 0
+
+	for _, v := range field {
+		if v {
+			activos++
+		}
+	}
+
+	return activos
+}
+func hyperCount(p hyperpoint, field map[hyperpoint]bool) (out int) {
+	// any of their coordinates differ by at most 1
+	for x := p.x - 1; x <= p.x+1; x++ {
+		for y := p.y - 1; y <= p.y+1; y++ {
+			for z := p.z - 1; z <= p.z+1; z++ {
+
+				for w := p.w - 1; w <= p.w+1; w++ {
+					neighbour := hyperpoint{x, y, z, w}
+					if neighbour != p && field[neighbour] {
+						out++
+					}
+
+				}
+
+			}
+		}
+	}
+	return
+}
 func countNeighbours(p point, field map[point]bool) (out int) {
 	// any of their coordinates differ by at most 1
 	for x := p.x - 1; x <= p.x+1; x++ {
@@ -115,6 +194,14 @@ func countNeighbours(p point, field map[point]bool) (out int) {
 		}
 	}
 	return
+}
+
+func hyperCopy(input map[hyperpoint]bool) map[hyperpoint]bool {
+	out := map[hyperpoint]bool{}
+	for k, v := range input {
+		out[k] = v
+	}
+	return out
 }
 
 func copyField(input map[point]bool) map[point]bool {
