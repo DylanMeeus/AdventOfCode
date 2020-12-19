@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -28,6 +29,7 @@ type TreeNode struct {
 
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
 }
 
 func solve1() int {
@@ -60,6 +62,61 @@ func solve1() int {
 	return out
 }
 
+func solve2() int {
+	rules := getRules()
+	lines := getInput()
+
+	// turn the rules into a tree?
+
+	adj := map[int]*resolvedRule{}
+
+	rules[8] = rule{subRules: [][]int{
+		{42},
+		{42, 8},
+	}}
+
+	rules[11] = rule{subRules: [][]int{
+		{42, 31},
+		{42, 11, 31},
+	}}
+
+	for k, v := range rules {
+		if v.isCharRule() {
+			adj[k] = &resolvedRule{resolved: []string{v.char}}
+		} else {
+			adj[k] = &resolvedRule{unresolved: v.subRules}
+		}
+	}
+
+	// resolve these rules(?)
+	resolve(adj, 42)
+	resolve(adj, 31)
+
+	r42 := fmt.Sprintf("(%s)", strings.Join(adj[42].resolved, "|"))
+	r31 := fmt.Sprintf("(%s)", strings.Join(adj[31].resolved, "|"))
+
+	// rule 8 is essentially 1 or more instances of rule 42
+	rule8String := fmt.Sprintf("(%s)+", r42)
+
+	makeRegexp := func(num int) *regexp.Regexp {
+		// rule 11 is an equal number of 42 and 31 rules
+		return regexp.MustCompile(fmt.Sprintf("^%s%s{%d}%s{%d}$", rule8String, r42, num, r31, num))
+	}
+
+	out := 0
+	for _, line := range lines {
+		for i := 1; i < 5; i++ { // magic numbers woo, try it X time sfor the recursive regex
+			pattern := makeRegexp(i)
+			if pattern.MatchString(line) {
+				out++
+				break
+			}
+		}
+	}
+
+	return out
+
+}
 func resolve(adj map[int]*resolvedRule, current int) []string {
 	if len(adj[current].resolved) != 0 {
 		// return a copy of resolved otherwise there's all kinds of side effect errors
@@ -84,15 +141,6 @@ func resolve(adj map[int]*resolvedRule, current int) []string {
 	}
 
 	return adj[current].resolved
-}
-
-func match(line string, r rule, rules map[int]rule) bool {
-	// do we have to build a string from these rules?
-	// can we expand the rules until we have a list of all allowed permutations?
-
-	// expand until it's just chars?
-
-	return true
 }
 
 func getInput() []string {
