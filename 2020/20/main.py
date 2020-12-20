@@ -29,14 +29,36 @@ def flip(tile):
 def solve1():
     img = get_input()
 
+
     a = img['2311']
     b = img['1951']
-    
+
     # create a rectangular image
     size = int(math.sqrt(len(img)))
     
+    img['3079'] = img['3079'][:-1]
     for tile in img:
-        backtrack(tile, img, {}, 0, size)
+        print(tile)
+        print(img[tile])
+
+
+    for tile in ['1951']:
+        print(tile)
+        for i in range(0,4):
+            rotated_tile = rotate90(img[tile])
+            img[tile] = rotated_tile
+            if backtrack(tile, img, {}, 0, size, img, {}):
+                print("true!")
+                return True
+
+            flipped_tile = flip(rotated_tile)
+            img[tile] = flipped_tile
+            if backtrack(tile, img, {}, 0, size, img, {}):
+                print("true!")
+                return True
+            else:
+                print("False..")
+            img[tile] = rotated_tile
 
 
 
@@ -82,12 +104,12 @@ def are_aligned(my_border, other_border, side):
     return False
 
 
-def fits(position, tile, grid):
+def fits(position, tile, grid, all_tiles):
     """ true if it fits """
     if len(tile) == 0:
         return
 
-    directions = { "bottom": (1,0), "top": (-1,0), "left": (0,1), "right": (0, -1)}
+    directions = { "bottom": (-1,0), "top": (1,0), "left": (0,-1), "right": (0, 1)}
 
     ok = False
 
@@ -103,37 +125,67 @@ def fits(position, tile, grid):
     return False
 
 
+def calculate_position(idx, size):
+    x = idx // size
+    y = idx % size
+    return (x,y)
 
-# backtrack to find aligned tiles?
-def backtrack(current, tiles, grid, current_idx, size):
+
+# backtrack to find aligned Tiles?
+def backtrack(current, tiles, grid, current_idx, size, all_tiles, grid_ids):
 
     # we map the current idx to the size and then look for neighbours?
-
     if len(tiles) == 0:
         return True
 
+
+    if len(grid_ids) == size * size:
+        print(grid_ids)
+        a,b,c,d = grid_ids[(0,0)], grid_ids[(2,0)], grid_ids[(0,2)], grid_ids[(2,2)]
+        print(int(a) * int(b) * int(c) * int(d))
+        return True
+
+    
     # we have to find the right, top, bottom and left border?
     img = tiles[current]
     if current_idx == 0:
         grid[(0,0)] = img
+        grid_ids[(0,0)] = current
         copy_tiles = copy.deepcopy(tiles)
         del copy_tiles[current]
-
         for remainder_tile in copy_tiles:
-            backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size)
-            break
+            if backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size, all_tiles, grid_ids):
+                return True
     else:
+        next_pos = calculate_position(current_idx, size)
+        print(next_pos)
         # find position in grid
-        if current_idx == 1:
-            # let's just simplify it for this
-            for tileID in tiles:
-                tile = tiles[tileID]
-                for i in range(0,4):
-                    tile = rotate90(tile)
-                    if fits((0,1), tile, grid):
-                        print("fits here")
-                    if fits((0,1), flip(tile), grid):
-                        print("fits flipped")
+        # let's just simplify it for this
+        for tileID in tiles:
+            tile = tiles[tileID]
+            for i in range(0,3):
+                tile = rotate90(tile)
+                if fits(next_pos, tile, grid, all_tiles):
+                    copy_tiles = copy.deepcopy(tiles)
+                    del copy_tiles[tileID]
+                    grid[next_pos] = tile
+                    grid_ids[next_pos] = tileID
+                    for remainder_tile in copy_tiles:
+                        if backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size, all_tiles, grid_ids):
+                            return True
+
+                flipped_tile = flip(tile)
+                if fits(next_pos, flipped_tile, grid, all_tiles):
+                    copy_tiles = copy.deepcopy(tiles)
+                    del copy_tiles[tileID]
+                    grid[next_pos] = flipped_tile
+                    grid_ids[next_pos] = tileID
+                    for remainder_tile in copy_tiles:
+                        if backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size, all_tiles, grid_ids):
+                            return True
+                grid[next_pos] = tile
+
+    return False
 
 
 
