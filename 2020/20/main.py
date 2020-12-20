@@ -30,32 +30,25 @@ def solve1():
     img = get_input()
 
 
-    a = img['2311']
-    b = img['1951']
-
     # create a rectangular image
     size = int(math.sqrt(len(img)))
-    
-    img['3079'] = img['3079'][:-1]
+
+    img['3919'] = img['3919'][:-1]
+    # img['3079'] = img['3079'][:-1]
+
     for tile in img:
-        print(tile)
-        print(img[tile])
-
-
-    for tile in ['1951']:
-        print(tile)
         for i in range(0,4):
             rotated_tile = rotate90(img[tile])
             img[tile] = rotated_tile
             if backtrack(tile, img, {}, 0, size, img, {}):
                 print("true!")
-                return True
+                #return True
 
             flipped_tile = flip(rotated_tile)
             img[tile] = flipped_tile
             if backtrack(tile, img, {}, 0, size, img, {}):
                 print("true!")
-                return True
+                #return True
             else:
                 print("False..")
             img[tile] = rotated_tile
@@ -109,9 +102,8 @@ def fits(position, tile, grid, all_tiles):
     if len(tile) == 0:
         return
 
-    directions = { "bottom": (-1,0), "top": (1,0), "left": (0,-1), "right": (0, 1)}
+    directions = { "bottom": (1,0), "top": (-1,0), "left": (0,-1), "right": (0, 1)}
 
-    ok = False
 
 
     my_borders = get_borders(tile)
@@ -158,7 +150,6 @@ def backtrack(current, tiles, grid, current_idx, size, all_tiles, grid_ids):
                 return True
     else:
         next_pos = calculate_position(current_idx, size)
-        print(next_pos)
         # find position in grid
         # let's just simplify it for this
         for tileID in tiles:
@@ -191,7 +182,7 @@ def backtrack(current, tiles, grid, current_idx, size, all_tiles, grid_ids):
 
 
 def get_input():
-    file = open("input_test.txt", "r")
+    file = open("input.txt", "r")
     input = (file.read())
     m = {}
     for tile in (input.split("\n\n")): 
