@@ -152,11 +152,12 @@ def backtrack(grid, grid_ids, remaining_tiles, current_idx, all_tiles, size):
         possible_configs = generate_tiles(all_tiles[tileID], tileID)
         for tile in possible_configs:
             if fits(idx_to_pos, tile, grid, all_tiles):
-                grid[idx_to_pos] = tile
+                copy_grid = copy.deepcopy(grid)
+                copy_grid[idx_to_pos] = tile
                 grid_ids[idx_to_pos] = tileID
                 cc = copy.deepcopy(remaining_tiles)
                 del cc[tileID]
-                if backtrack(grid, grid_ids,  cc, current_idx + 1, all_tiles, size):
+                if backtrack(copy_grid, grid_ids,  cc, current_idx + 1, all_tiles, size):
                     return True
 
     return False
