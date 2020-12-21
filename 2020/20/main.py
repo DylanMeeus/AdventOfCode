@@ -57,25 +57,24 @@ def solve1():
     #img['3919'] = img['3919'][:-1]
     # img['3079'] = img['3079'][:-1]
 
-    for tileID in img:
-        print(tileID)
-        for tile in generate_tiles(img[tileID], tileID):
-            img[tileID] = tile
-            if backtrack(tileID, img, {}, 0, size, img, {}):
-                print("true!")
-                return
-            else:
-                print("False")
+
+    backtrack({}, {},img, 0, img, size)
 
 
 
 def get_borders(tile):
-    print(tile)
     borders = {}
-    borders[top] = tile[0]
     borders[bottom] = tile[len(tile)-1]
-    #if borders[bottom] == "":
-        #borders[bottom] = tile[len(tile)-2]
+
+    top_side = []
+    bottom_side = []
+    for c in tile[0]:
+        top_side.append(c)
+    borders[top] = top_side
+
+    for c in tile[len(tile)-1]:
+        bottom_side.append(c)
+    borders[bottom] = bottom_side
 
 
     left_side = []
@@ -116,16 +115,18 @@ def fits(position, tile, grid, all_tiles):
 
     directions = { "bottom": (1,0), "top": (-1,0), "left": (0,-1), "right": (0, 1)}
 
-
-
     my_borders = get_borders(tile)
+    neighbors = 0
     for side, dir in directions.items(): 
         new_pos = (position[0] + dir[0], position[1] + dir[1])
         if new_pos in grid:
+            neighbors += 1
             other_borders = get_borders(grid[new_pos])
             if are_aligned(my_borders, other_borders, side):
                 return True
 
+    if neighbors == 0:
+        return True
     return False
 
 
@@ -135,60 +136,35 @@ def calculate_position(idx, size):
     return (x,y)
 
 
-# backtrack to find aligned Tiles?
-def backtrack(current, tiles, grid, current_idx, size, all_tiles, grid_ids):
 
-    # we map the current idx to the size and then look for neighbours?
-    if len(tiles) == 0:
-        return True
-
-
-    if len(grid_ids) == size * size:
-        #print(grid_ids)
-        corners = [(0,0), (0, size - 1), (size - 1, 0), (size - 1, size - 1)]
-
+def backtrack(grid, grid_ids, remaining_tiles, current_idx, all_tiles, size):
+    if len(remaining_tiles) == 0:
+        print("TRUE")
+        corners = [(0,0), (0, size-1), (size-1, 0), (size-1,size-1)]
         result = 1
         for c in corners:
             result *= int(grid_ids[c])
-
-
         print(result)
         return True
 
-    
-    # we have to find the right, top, bottom and left border?
-    img = tiles[current]
-    if current_idx == 0:
-        grid[(0,0)] = img
-        grid_ids[(0,0)] = current
-        copy_tiles = copy.deepcopy(tiles)
-        del copy_tiles[current]
-        for remainder_tile in copy_tiles:
-            if backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size, all_tiles, grid_ids):
-                return True
-    else:
-        next_pos = calculate_position(current_idx, size)
-        # find position in grid
-        # let's just simplify it for this
-        for tileID in tiles:
-            tile = all_tiles[tileID]
-            for tile in generate_tiles(tile, tileID):
-                if fits(next_pos, tileID, grid, all_tiles):
-                    copy_tiles = copy.deepcopy(tiles)
-                    del copy_tiles[tileID]
-                    grid[next_pos] = tile
-                    grid_ids[next_pos] = tileID
-                    for remainder_tile in copy_tiles:
-                        if backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size, all_tiles, grid_ids):
-                            return True
+    idx_to_pos = calculate_position(current_idx,size)
+    for tileID in remaining_tiles:
+        possible_configs = generate_tiles(all_tiles[tileID], tileID)
+        for tile in possible_configs:
+            if fits(idx_to_pos, tile, grid, all_tiles):
+                grid[idx_to_pos] = tile
+                grid_ids[idx_to_pos] = tileID
+                cc = copy.deepcopy(remaining_tiles)
+                del cc[tileID]
+                if backtrack(grid, grid_ids,  cc, current_idx + 1, all_tiles, size):
+                    return True
 
     return False
 
 
 
-
 def get_input():
-    file = open("input_test.txt", "r")
+    file = open("input.txt", "r")
     input = (file.read())
     m = {}
     for tile in (input.split("\n\n")): 
