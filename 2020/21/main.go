@@ -58,15 +58,60 @@ func solve2() string {
 		}
 	}
 
+	changed := true
+	for changed {
+		changed = false
+		for k, v := range m {
+			if len(v) == 1 {
+				for x, _ := range v {
+					// delete x from all others
+					for kk, vv := range m {
+						if kk != k && len(vv) > 1 {
+							m[kk] = filter(vv, x)
+							changed = true
+						}
+					}
+				}
+			}
+		}
+	}
+
 	fmt.Printf("%v\n", m)
 
+	values := []string{}
+
+	for _, v := range m {
+		for x, _ := range v {
+			values = append(values, x)
+		}
+	}
+
+	sort.Strings(values)
 	keys := []string{}
 
-	for k, _ := range m {
-		keys = append(keys, k)
+	for _, v := range values {
+		for k, vv := range m {
+			for x, _ := range vv {
+				if x == v {
+					keys = append(keys, k)
+				}
+			}
+
+		}
 	}
-	sort.Strings(keys)
+
 	return strings.Join(keys, ",")
+}
+
+func filter(ss map[string]bool, s string) map[string]bool {
+	out := map[string]bool{}
+
+	for k, _ := range ss {
+		if k != s {
+			out[k] = true
+		}
+	}
+	return out
 }
 
 func solve1() int {
