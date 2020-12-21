@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"sort"
 	"strings"
 )
 
@@ -13,6 +14,59 @@ type food struct {
 
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
+}
+
+func solve2() string {
+	foods := getInput()
+
+	ingredientAllergen := map[string][]string{}
+	allIngs := map[string]bool{}
+	for _, food := range foods {
+		for _, ing := range food.ingredients {
+			allIngs[ing] = true
+			for _, alg := range food.allergens {
+				ingredientAllergen[ing] = append(ingredientAllergen[ing], alg)
+			}
+		}
+	}
+
+	m := map[string]map[string]bool{}
+	for ingredient, possibleAllergens := range ingredientAllergen {
+		for _, allergen := range possibleAllergens {
+			isMatch := true
+			for _, food := range foods {
+				// this allergen can not appear in a line where the food does not appear
+				if contains(allergen, food.allergens) && !contains(ingredient, food.ingredients) {
+					isMatch = false
+				}
+			}
+			if isMatch {
+				if m[ingredient] == nil {
+					m[ingredient] = map[string]bool{}
+				}
+				m[ingredient][allergen] = true
+			}
+		}
+	}
+
+	// we have to make sure they are unique..
+	for k, v := range m {
+		fmt.Printf("%v contains:\n", k)
+		for x, _ := range v {
+			fmt.Printf("\t%v\n", x)
+		}
+	}
+
+	fmt.Printf("%v\n", m)
+
+	keys := []string{}
+
+	for k, _ := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return strings.Join(keys, ",")
 }
 
 func solve1() int {
