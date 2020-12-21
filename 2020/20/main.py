@@ -1,11 +1,33 @@
 import math
 import copy
+import numpy as np
 
 
 top = "top"
 bottom = "bottom"
 right = "right"
 left = "left"
+
+
+tile_cache = {}
+
+def generate_tiles(tile, tileID):
+    global tile_cache
+    if tileID in tile_cache:
+        return tile_cache[tileID]
+
+    tiles = []
+    tiles.append(tile)
+    tiles.append(np.rot90(tile, 1))
+    tiles.append(np.rot90(tile, 2))
+    tiles.append(np.rot90(tile, 3))
+
+    tiles.append(np.flipud(tile))
+    tiles.append(np.rot90(np.flipud(tile), 1))
+    tiles.append(np.rot90(np.flipud(tile), 2))
+    tiles.append(np.rot90(np.flipud(tile), 3))
+    tile_cache[tileID] = tiles
+    return tiles
 
 
 def rotate90(tile):
@@ -29,48 +51,38 @@ def flip(tile):
 def solve1():
     img = get_input()
 
-
     # create a rectangular image
     size = int(math.sqrt(len(img)))
 
-    img['3919'] = img['3919'][:-1]
+    #img['3919'] = img['3919'][:-1]
     # img['3079'] = img['3079'][:-1]
 
-    for tile in img:
-        for i in range(0,4):
-            rotated_tile = rotate90(img[tile])
-            img[tile] = rotated_tile
-            if backtrack(tile, img, {}, 0, size, img, {}):
+    for tileID in img:
+        print(tileID)
+        for tile in generate_tiles(img[tileID], tileID):
+            img[tileID] = tile
+            if backtrack(tileID, img, {}, 0, size, img, {}):
                 print("true!")
-                #return True
-
-            flipped_tile = flip(rotated_tile)
-            img[tile] = flipped_tile
-            if backtrack(tile, img, {}, 0, size, img, {}):
-                print("true!")
-                #return True
+                return
             else:
-                print("False..")
-            img[tile] = rotated_tile
+                print("False")
 
 
 
 def get_borders(tile):
+    print(tile)
     borders = {}
     borders[top] = tile[0]
     borders[bottom] = tile[len(tile)-1]
-    if borders[bottom] == "":
-        borders[bottom] = tile[len(tile)-2]
+    #if borders[bottom] == "":
+        #borders[bottom] = tile[len(tile)-2]
 
 
-
-    left_side = ""
-    right_side = ""
+    left_side = []
+    right_side = []
     for line in tile:
-        if line == "":
-            continue
-        left_side += line[0]
-        right_side += line[-1:]
+        left_side.append(line[0])
+        right_side.append(line[-1:])
 
     borders[left] = left_side
     borders[right] = right_side
@@ -132,9 +144,15 @@ def backtrack(current, tiles, grid, current_idx, size, all_tiles, grid_ids):
 
 
     if len(grid_ids) == size * size:
-        print(grid_ids)
-        a,b,c,d = grid_ids[(0,0)], grid_ids[(2,0)], grid_ids[(0,2)], grid_ids[(2,2)]
-        print(int(a) * int(b) * int(c) * int(d))
+        #print(grid_ids)
+        corners = [(0,0), (0, size - 1), (size - 1, 0), (size - 1, size - 1)]
+
+        result = 1
+        for c in corners:
+            result *= int(grid_ids[c])
+
+
+        print(result)
         return True
 
     
@@ -153,10 +171,9 @@ def backtrack(current, tiles, grid, current_idx, size, all_tiles, grid_ids):
         # find position in grid
         # let's just simplify it for this
         for tileID in tiles:
-            tile = tiles[tileID]
-            for i in range(0,3):
-                tile = rotate90(tile)
-                if fits(next_pos, tile, grid, all_tiles):
+            tile = all_tiles[tileID]
+            for tile in generate_tiles(tile, tileID):
+                if fits(next_pos, tileID, grid, all_tiles):
                     copy_tiles = copy.deepcopy(tiles)
                     del copy_tiles[tileID]
                     grid[next_pos] = tile
@@ -165,32 +182,22 @@ def backtrack(current, tiles, grid, current_idx, size, all_tiles, grid_ids):
                         if backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size, all_tiles, grid_ids):
                             return True
 
-                flipped_tile = flip(tile)
-                if fits(next_pos, flipped_tile, grid, all_tiles):
-                    copy_tiles = copy.deepcopy(tiles)
-                    del copy_tiles[tileID]
-                    grid[next_pos] = flipped_tile
-                    grid_ids[next_pos] = tileID
-                    for remainder_tile in copy_tiles:
-                        if backtrack(remainder_tile, copy_tiles, grid, current_idx + 1, size, all_tiles, grid_ids):
-                            return True
-                grid[next_pos] = tile
-
     return False
 
 
 
 
 def get_input():
-    file = open("input.txt", "r")
+    file = open("input_test.txt", "r")
     input = (file.read())
     m = {}
     for tile in (input.split("\n\n")): 
         tile_parts = tile.split("\n")
         title = tile_parts[0].split(" ")[1][:-1]
-        tiles = tile_parts[1:]
+        tiles = (tile_parts[1:])
+        tiles = (list(map(lambda k: list(k), tiles)))
+        tiles = list(filter(lambda k: len(k) > 0, tiles))
         m[title] = tiles
-
     return m
 
 
