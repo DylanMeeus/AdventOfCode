@@ -40,10 +40,10 @@ func (q *Queue) Len() int {
 	return len(q.a)
 }
 
-func (q *Queue) Copy() *Queue {
-	ca := make([]int, len(q.a))
-	for i, v := range q.a {
-		ca[i] = v
+func (q *Queue) Copy(n int) *Queue {
+	ca := make([]int, n)
+	for i := 0; i < n; i++ {
+		ca[i] = q.a[i]
 	}
 	return &Queue{a: ca}
 }
@@ -137,10 +137,10 @@ func play(p1, p2 *Queue, cache, memo map[Config]bool) (p1won bool) {
 		top1, top2 := p1.Pop(), p2.Pop()
 		// determine if we have to play a subgame
 
-		if top1 == p1.Len() || top2 == p2.Len() {
+		if p1.Len() >= top1 && p2.Len() >= top2 {
 			// play sub game!
 			// copy the queues and press play, essentially
-			if play(p1.Copy(), p2.Copy(), map[Config]bool{}, memo) {
+			if play(p1.Copy(top1), p2.Copy(top2), map[Config]bool{}, memo) {
 				// player 1 won the cards
 				p1.Push(top1)
 				p1.Push(top2)
@@ -160,7 +160,6 @@ func play(p1, p2 *Queue, cache, memo map[Config]bool) (p1won bool) {
 	}
 
 	memo[startconfig] = !p1.Empty()
-
 	// determine the winner
 	return memo[startconfig]
 }
