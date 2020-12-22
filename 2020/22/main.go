@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+type Config struct {
+	deck1, deck2 string
+}
+
 type Queue struct {
 	a []int
 }
@@ -36,13 +40,29 @@ func (q *Queue) Len() int {
 	return len(q.a)
 }
 
+func (q *Queue) Copy() *Queue {
+	ca := make([]int, len(q.a))
+	for i, v := range q.a {
+		ca[i] = v
+	}
+	return &Queue{a: ca}
+}
+
+func (q *Queue) ToString() string {
+	s := ""
+	for _, x := range q.a {
+		s += strconv.Itoa(x)
+	}
+	return s
+}
+
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
 }
 
 func solve1() int {
 	p1, p2 := getInput()
-	fmt.Printf("p1: %v\np2: %v\n", p1, p2)
 
 	for !p1.Empty() && !p2.Empty() {
 		top1, top2 := p1.Pop(), p2.Pop()
@@ -70,6 +90,79 @@ func solve1() int {
 	}
 
 	return res
+}
+
+func solve2() int {
+	p1, p2 := getInput()
+	p1won := play(p1, p2, map[Config]bool{}, map[Config]bool{})
+
+	winner := p1
+	if !p1won {
+		winner = p2
+	}
+
+	N := winner.Len()
+	res := 0
+	for !winner.Empty() {
+		val := winner.Pop()
+		res += (val * N)
+		N--
+	}
+	return res
+}
+
+func conf(p1, p2 *Queue) Config {
+	return Config{
+		deck1: p1.ToString(),
+		deck2: p2.ToString(),
+	}
+
+}
+
+func play(p1, p2 *Queue, cache, memo map[Config]bool) (p1won bool) {
+	// if we have seen this config before, player 1 wins instantly
+	// now we check the cache to see if we have seen this configuration before..
+	startconfig := conf(p1, p2)
+	if p1, ok := memo[startconfig]; ok {
+		return p1
+	}
+	for !p1.Empty() && !p2.Empty() {
+		// check here if we have seen the config before
+		if cache[conf(p1, p2)] {
+			return true
+		} else {
+			cache[conf(p1, p2)] = true
+		}
+
+		top1, top2 := p1.Pop(), p2.Pop()
+		// determine if we have to play a subgame
+
+		if top1 == p1.Len() || top2 == p2.Len() {
+			// play sub game!
+			// copy the queues and press play, essentially
+			if play(p1.Copy(), p2.Copy(), map[Config]bool{}, memo) {
+				// player 1 won the cards
+				p1.Push(top1)
+				p1.Push(top2)
+			} else {
+				p2.Push(top2)
+				p2.Push(top1)
+			}
+		} else {
+			if top1 > top2 {
+				p1.Push(top1)
+				p1.Push(top2)
+			} else {
+				p2.Push(top2)
+				p2.Push(top1)
+			}
+		}
+	}
+
+	memo[startconfig] = !p1.Empty()
+
+	// determine the winner
+	return memo[startconfig]
 }
 
 // getInput returns the cards for player 1 / player 2
