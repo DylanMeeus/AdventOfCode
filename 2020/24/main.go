@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"strings"
 )
 
@@ -27,6 +28,91 @@ type point struct {
 
 func main() {
 	fmt.Printf("%v\n", solve1())
+	fmt.Printf("%v\n", solve2())
+}
+
+func solve2() int {
+	input := getInput()
+	floor := map[point]bool{}
+
+	for _, line := range input {
+		x, y, z := findPosition(line)
+		floor[point{x, y, z}] = !floor[point{x, y, z}]
+		//floor[point{x, y, z}] = BLACK
+	}
+
+	// is this the starting configuration?
+
+	out := 0
+	for day := 0; day < 100; day++ {
+		fmt.Printf("day: %v\n", day)
+		floor = timeStep(floor)
+	}
+
+	for _, v := range floor {
+		if v == BLACK {
+			out++
+		}
+	}
+	return out
+}
+
+func abs(i int) int {
+	return int(math.Abs(float64(i)))
+
+}
+
+func timeStep(input map[point]bool) map[point]bool {
+
+	// always increase the size smartly by one?
+	SIZE := 100
+	out := map[point]bool{}
+	for x := -SIZE; x < SIZE; x++ {
+		for y := -SIZE; y < SIZE; y++ {
+			for z := -SIZE; z < SIZE; z++ {
+				p := point{x, y, z}
+				c := input[p]
+				n := countNeighbours(input, p)
+				out[p] = input[p]
+				if (c == BLACK && n == 0) || (c == BLACK && n > 2) {
+					out[p] = WHITE
+				}
+
+				if c == WHITE && n == 2 {
+					out[p] = BLACK
+				}
+			}
+		}
+	}
+	return out
+
+}
+
+// count adjacent black tiles
+func countNeighbours(floor map[point]bool, position point) int {
+	// x y z points
+	var directions = []point{
+		{0, 1, -1}, // NW
+		{1, 0, -1}, // NE
+		{1, -1, 0}, // E
+		{0, -1, 1}, // SW
+		{-1, 0, 1}, // SW
+		{-1, 1, 0}, // W
+	}
+
+	out := 0
+	for _, dir := range directions {
+		pos := point{
+			x: position.x + dir.x,
+			y: position.y + dir.y,
+			z: position.z + dir.z,
+		}
+		if floor[pos] == BLACK {
+			out++
+		}
+	}
+	return out
+
 }
 
 func solve1() int {
