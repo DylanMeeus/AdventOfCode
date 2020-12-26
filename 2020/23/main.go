@@ -34,6 +34,7 @@ func (l *ListNode) Debug() {
 
 func main() {
 	fmt.Printf("%v\n", solve1())
+	//fmt.Printf("%v\n", solve2())
 }
 
 func atIndex(m map[int]int, idx int) int {
@@ -51,6 +52,43 @@ func atIndex(m map[int]int, idx int) int {
 
 }
 
+func solve2() int {
+	m := getInput2()
+
+	previousCup := -1
+	for i := 0; i < 100; i++ {
+		fmt.Printf("move :%v\n", i+1)
+		var take int
+		if previousCup == -1 {
+			take = atIndex(m, 0)
+			previousCup = take
+			//fmt.Printf("\ttook (%v)\n", take)
+		} else {
+			// at the right of the previous cup
+			next := m[previousCup]
+			next += 1
+			if next >= MAX_CUP {
+				next = 0
+			}
+			take = atIndex(m, next)
+			previousCup = take
+			//fmt.Printf("\ttook (%v)\n", take)
+		}
+		nextThree := take3(m, m[take])
+		//fmt.Printf("\tpick up: %v\n", nextThree)
+		dest := getDestination(m, take, nextThree)
+		//fmt.Printf("\tdestination: %v\n", atIndex(m, dest))
+		m = move(m, nextThree, dest)
+
+	}
+
+	// find the labels on the cups after cup 1
+
+	fmt.Printf("%v\n", m)
+	// let's play the game
+
+	return 0
+}
 func solve1() int {
 	m := getInput()
 
@@ -84,8 +122,15 @@ func solve1() int {
 
 	// find the labels on the cups after cup 1
 
+	fmt.Printf("%v\n", m[1])
+
 	fmt.Printf("%v\n", m)
 	// let's play the game
+
+	for i := 0; i < 8; i++ {
+		fmt.Printf("%v - ", atIndex(m, i))
+	}
+	fmt.Println()
 
 	return 0
 }
@@ -116,7 +161,7 @@ func move(m map[int]int, nextThree []int, destinationIdx int) map[int]int {
 		mod = append(mod, idxs[i])
 	}
 
-	fmt.Printf("\tresult: %v\n", mod)
+	//fmt.Printf("\tresult: %v\n", mod)
 	out := map[int]int{}
 	for i, v := range mod {
 		out[v] = i
@@ -195,6 +240,24 @@ func getInput() map[int]int {
 
 	for i, v := range input {
 		m[v] = i
+	}
+
+	return m
+}
+
+func getInput2() map[int]int {
+	m := map[int]int{}
+
+	lastIdx := 0
+	for i, v := range input {
+		m[v] = i
+		lastIdx = i
+	}
+
+	lastIdx++
+	for i := 10; i < int(10e6); i++ {
+		m[i] = lastIdx
+		lastIdx++
 	}
 
 	return m
