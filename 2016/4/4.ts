@@ -30,16 +30,11 @@ function calculateChecksum(input: string): string {
 }
 
 
-function solve() {
-    fs.readFile('input.txt', 'utf8', (error, data) => {
-        if (error != null) {
-            console.log("could not read file, sorry!");
-            return;
-        }
-        // aaaaa-bbb-z-y-x-123[abxyz]
-        // { name }       {id} {checksum}
-        const lines: string[] = data.split("\n").filter(l => l != "");
 
+function convertInputToStruct(lines: string[]): Room[] {
+        // aaaaa-bbb-z-y-x-123[abxyz]
+        // turn into 3 parts like below 
+        // { name }       {id} {checksum}
         const mapToRoom = (input: string): Room => {
             const parts = input.split("[");
             const nameAndSector = parts[0];
@@ -55,12 +50,38 @@ function solve() {
             }
         };
 
-        const validRooms = lines.map(mapToRoom).filter(room => calculateChecksum(room.name) == room.checksum);
-        const result: number = validRooms.map( (r: Room) => r.sector)
-                                             .reduce((prev: number, curr: number, idx, arr: number[]) => prev + curr);
-        
+        return lines.map(mapToRoom);
+}
+
+function solve1() {
+    fs.readFile('input.txt', 'utf8', (error, data) => {
+        if (error != null) {
+            console.log("could not read file, sorry!");
+            return;
+        }
+        const lines: string[] = data.split("\n").filter(l => l != "");
+
+        const validRooms = convertInputToStruct(lines).filter(room => calculateChecksum(room.name) == room.checksum);
+        const result: number = validRooms.map((r: Room) => r.sector)
+                                             .reduce((prev: number, curr: number) => prev + curr);
         console.log(result);
     });
 }
 
-solve();
+function solve2() {
+    fs.readFile('input.txt', 'utf8', (error, data) => {
+        if (error != null) {
+            console.log("could not read file, sorry!");
+            return;
+        }
+        const lines: string[] = data.split("\n").filter(l => l != "");
+
+        const validRooms = convertInputToStruct(lines).filter(room => calculateChecksum(room.name) == room.checksum);
+        const result: number = validRooms.map((r: Room) => r.sector)
+                                             .reduce((prev: number, curr: number) => prev + curr);
+        console.log(result);
+    });
+}
+
+solve1();
+solve2();
