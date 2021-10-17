@@ -68,6 +68,19 @@ function solve1() {
     });
 }
 
+
+// caesarCipher shifts each character in `str` by `rot`
+function caesarCipher(str: string, rot: number): string {
+    const normalized_rot = rot % 26;
+
+    const char_codes = str.split('').map(char => char.charCodeAt(0) - 97); // 97 == 'a'
+
+    const result = char_codes.map(code => (code + normalized_rot) % 26).
+        map(rot_code => String.fromCharCode(rot_code + 97));
+
+    return result.join('');
+}
+
 function solve2() {
     fs.readFile('input.txt', 'utf8', (error, data) => {
         if (error != null) {
@@ -75,13 +88,18 @@ function solve2() {
             return;
         }
         const lines: string[] = data.split("\n").filter(l => l != "");
+        const rooms = convertInputToStruct(lines);
 
-        const validRooms = convertInputToStruct(lines).filter(room => calculateChecksum(room.name) == room.checksum);
-        const result: number = validRooms.map((r: Room) => r.sector)
-                                             .reduce((prev: number, curr: number) => prev + curr);
+        const deciphered = rooms.map(r => {
+            return {
+                name: caesarCipher(r.name, r.sector),
+                sector: r.sector
+            };
+        });
+        const result = deciphered.filter(r => r.name.indexOf('obj') > 0)
         console.log(result);
     });
 }
 
-solve1();
+//solve1();
 solve2();
