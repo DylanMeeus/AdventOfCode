@@ -9,4 +9,4 @@ Advent of Code
 * Common Lisp
 * Scala
 * Crystal
-
+* TypeScript
