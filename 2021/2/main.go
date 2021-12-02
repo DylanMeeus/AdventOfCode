@@ -9,6 +9,7 @@ import (
 
 func main() {
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 type Cmd struct {
@@ -45,6 +46,23 @@ func solve() int {
 		"forward": func(i int) { x += i },
 		"down":    func(i int) { y += i },
 		"up":      func(i int) { y -= i },
+	}
+
+	for _, cmd := range data {
+		actions[cmd.direction](cmd.unit)
+
+	}
+	return x * y
+}
+
+func solve2() int {
+	data := getData()
+
+	x, y, aim := 0, 0, 0
+	actions := map[string]func(i int){
+		"forward": func(i int) { x += i; y += (aim * i) },
+		"down":    func(i int) { aim += i },
+		"up":      func(i int) { aim -= i },
 	}
 
 	for _, cmd := range data {
