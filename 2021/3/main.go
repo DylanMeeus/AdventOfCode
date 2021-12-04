@@ -49,7 +49,6 @@ func solve2() int64 {
 	var oxygenValue, scrubberValue int64
 	var err error
 	for col := 0; col < len(data[0]); col++ {
-		fmt.Printf("target: %v\n", oxygenTarget)
 		oxygenCandidates = filter(oxygenCandidates, func(s string) bool {
 			return string(s[col]) == oxygenTarget[col]
 		})
@@ -77,7 +76,8 @@ func solve2() int64 {
 		if err != nil {
 			panic(err)
 		}
-		oxygenTarget, scrubberTarget = getTargets(oxygenCandidates)
+		oxygenTarget, scrubberTarget = getTargets(scrubberCandidates)
+
 	}
 
 	fmt.Printf("oxygen target: %v\n", oxygenTarget)
