@@ -66,8 +66,6 @@ func (m mask) getRow(row int) [5]bool {
 	for col := 0; col < len(m[row]); col++ {
 		out[col] = m[row][col]
 	}
-	fmt.Printf("%v\n", m)
-	fmt.Printf("%v\n", out)
 	return out
 }
 
@@ -89,6 +87,7 @@ func newBoard() board {
 
 func main() {
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 func getData() ([]int, []markedBoard) {
@@ -96,7 +95,6 @@ func getData() ([]int, []markedBoard) {
 
 	lines := strings.Split(string(in), "\n")
 	intStream := getIntStream(lines[0], ",")
-	fmt.Printf("%v\n", intStream)
 
 	boards := []markedBoard{}
 	b := newBoard()
@@ -135,6 +133,70 @@ func solve() int {
 	}
 
 	return 0
+}
+
+func contains(is []int, target int) bool {
+	for _, i := range is {
+		if i == target {
+			return true
+		}
+	}
+	return false
+}
+
+type MapWithInsertionOrder struct {
+	innerMap       map[int]int
+	insertionOrder []int
+}
+
+func newMapWithInsertionOrder() *MapWithInsertionOrder {
+	return &MapWithInsertionOrder{
+		innerMap:       map[int]int{},
+		insertionOrder: []int{},
+	}
+}
+
+func (m *MapWithInsertionOrder) put(key, value int) {
+	if contains(m.insertionOrder, key) {
+		return
+	}
+	m.innerMap[key] = value
+	m.insertionOrder = append(m.insertionOrder, key)
+}
+
+func (m *MapWithInsertionOrder) contains(key int) bool {
+	if _, ok := m.innerMap[key]; ok {
+		return true
+	}
+	return false
+}
+
+func (m *MapWithInsertionOrder) getLastInsertedKV() (int, int) {
+	last := m.insertionOrder[len(m.insertionOrder)-1]
+	return last, m.innerMap[last]
+}
+
+func solve2() int {
+	numbers, boards := getData()
+
+	insMap := newMapWithInsertionOrder()
+	for _, num := range numbers {
+		for bidx, b := range boards {
+			if insMap.contains(bidx) {
+				continue
+			}
+			b.mark(num)
+			if b.checkWinCondition() {
+				insMap.put(bidx, num)
+			}
+		}
+	}
+
+	lastIdx, winningNumber := insMap.getLastInsertedKV()
+
+	fmt.Printf("last idx: %v -- won at %v\n", lastIdx, winningNumber)
+
+	return boards[lastIdx].sumUnmarked() * winningNumber
 }
 
 func getIntStream(line string, sep string) []int {
