@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	fmt.Println("vim-go")
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 type Point struct {
@@ -29,10 +29,9 @@ func (l Line) isVertical() bool {
 	return l.start.x == l.end.x
 }
 
-func (l Line) pointsOnLine() []Point {
+func (l Line) horizontalLinePoints() []Point {
 	points := []Point{}
 	if l.isHorizontal() {
-
 		if l.start.x < l.end.x {
 			for i := l.start.x; i <= l.end.x; i++ {
 				points = append(points, Point{x: i, y: l.start.y})
@@ -42,8 +41,13 @@ func (l Line) pointsOnLine() []Point {
 				points = append(points, Point{x: i, y: l.start.y})
 			}
 		}
+	}
+	return points
+}
 
-	} else if l.isVertical() {
+func (l Line) verticalLinePoints() []Point {
+	points := []Point{}
+	if l.isVertical() {
 
 		if l.start.y < l.end.y {
 			for i := l.start.y; i <= l.end.y; i++ {
@@ -54,10 +58,68 @@ func (l Line) pointsOnLine() []Point {
 				points = append(points, Point{x: l.start.x, y: i})
 			}
 		}
+	}
+	return points
+}
+
+func (l Line) diagonaLinePoints() []Point {
+
+	points := []Point{}
+	if l.isHorizontal() || l.isVertical() {
+		return points
+	}
+
+	// we need to find out the direction of the line
+
+	if l.start.x < l.end.x {
+		// this point starts first
+		if l.start.y < l.end.y {
+
+			i := l.start.x
+			j := l.start.y
+
+			for i <= l.end.x && j <= l.end.y {
+				points = append(points, Point{x: i, y: j})
+				i++
+				j++
+			}
+
+		} else {
+
+			i := l.start.x
+			j := l.start.y
+
+			for i <= l.end.x && j >= l.end.y {
+				points = append(points, Point{x: i, y: j})
+				i++
+				j--
+			}
+		}
 
 	} else {
-		// no-op
+		if l.start.y < l.end.y {
+
+			i := l.start.x
+			j := l.start.y
+
+			for i >= l.end.x && j <= l.end.y {
+				points = append(points, Point{x: i, y: j})
+				i--
+				j++
+			}
+		} else {
+
+			i := l.start.x
+			j := l.start.y
+
+			for i >= l.end.x && j >= l.end.y {
+				points = append(points, Point{x: i, y: j})
+				i--
+				j--
+			}
+		}
 	}
+
 	return points
 }
 
@@ -100,7 +162,29 @@ func solve() int {
 	lines := getData()
 	fumeMap := map[Point]int{}
 	for _, line := range lines {
-		points := line.pointsOnLine()
+		points := append(line.horizontalLinePoints(), line.verticalLinePoints()...)
+		for _, point := range points {
+			fumeMap[point]++
+		}
+	}
+
+	result := 0
+
+	for _, value := range fumeMap {
+		if value >= 2 {
+			result++
+		}
+	}
+
+	return result
+}
+
+func solve2() int {
+	lines := getData()
+	fumeMap := map[Point]int{}
+	for _, line := range lines {
+		points := append(line.horizontalLinePoints(), line.verticalLinePoints()...)
+		points = append(points, line.diagonaLinePoints()...)
 		for _, point := range points {
 			fumeMap[point]++
 		}
