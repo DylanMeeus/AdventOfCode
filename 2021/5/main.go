@@ -10,6 +10,8 @@ import (
 func main() {
 	fmt.Printf("%v\n", solve())
 	fmt.Printf("%v\n", solve2())
+
+	fmt.Printf("outcome should be 18672, and got: %v\n", solve2())
 }
 
 type Point struct {
@@ -36,10 +38,6 @@ func (l Line) horizontalLinePoints() []Point {
 			for i := l.start.x; i <= l.end.x; i++ {
 				points = append(points, Point{x: i, y: l.start.y})
 			}
-		} else {
-			for i := l.end.x; i <= l.start.x; i++ {
-				points = append(points, Point{x: i, y: l.start.y})
-			}
 		}
 	}
 	return points
@@ -48,7 +46,6 @@ func (l Line) horizontalLinePoints() []Point {
 func (l Line) verticalLinePoints() []Point {
 	points := []Point{}
 	if l.isVertical() {
-
 		if l.start.y < l.end.y {
 			for i := l.start.y; i <= l.end.y; i++ {
 				points = append(points, Point{x: l.start.x, y: i})
@@ -96,28 +93,6 @@ func (l Line) diagonaLinePoints() []Point {
 			}
 		}
 
-	} else {
-		if l.start.y < l.end.y {
-
-			i := l.start.x
-			j := l.start.y
-
-			for i >= l.end.x && j <= l.end.y {
-				points = append(points, Point{x: i, y: j})
-				i--
-				j++
-			}
-		} else {
-
-			i := l.start.x
-			j := l.start.y
-
-			for i >= l.end.x && j >= l.end.y {
-				points = append(points, Point{x: i, y: j})
-				i--
-				j--
-			}
-		}
 	}
 
 	return points
@@ -138,6 +113,10 @@ func getData() []Line {
 		parts := strings.Split(line, "->")
 		firstPoint := stringPointToPoint(parts[0])
 		secondPoint := stringPointToPoint(parts[1])
+
+		if firstPoint.x > secondPoint.x {
+			firstPoint, secondPoint = secondPoint, firstPoint
+		}
 
 		lines = append(lines, Line{start: firstPoint, end: secondPoint})
 	}
