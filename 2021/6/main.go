@@ -58,8 +58,27 @@ func solve() int {
 
 func solve2() int {
 	data := getData()
-	school := simulateAsString(data, 80)
-	return len(school)
+	lendata := len(data)
+
+	sum := 0
+	for i, fish := range data {
+		sum += 1 + recursiveSpawn(256, int(fish.Timer))
+		fmt.Printf("processed fish %v of %v\n", i, lendata)
+	}
+
+	return sum
+}
+
+func recursiveSpawn(days_left, start int) int {
+	if days_left < start {
+		return 0
+	}
+
+	total := 0
+	for i := start; i < days_left; i += 7 {
+		total += 1 + recursiveSpawn(days_left-i, 9)
+	}
+	return total
 }
 
 func copyMutable(school []Fish) []*Fish {
@@ -68,41 +87,6 @@ func copyMutable(school []Fish) []*Fish {
 		mutableSchool[i] = &school[i]
 	}
 	return mutableSchool
-}
-
-func simulateAsString(initialSchool []Fish, days int) string {
-	start := ""
-	for _, fish := range initialSchool {
-		start += strconv.Itoa(int(fish.Timer))
-	}
-
-	strKV := map[string]string{
-		"8": "7",
-		"7": "6",
-		"6": "5",
-		"5": "4",
-		"4": "3",
-		"3": "2",
-		"2": "1",
-		"1": "0",
-		"0": "6",
-	}
-
-	runSim := func(s string) string {
-		newStr := ""
-		for _, char := range s {
-			if string(char) == "0" {
-				newStr += "8"
-			}
-			newStr += strKV[string(char)]
-		}
-		return newStr
-	}
-
-	for day := 0; day < days; day++ {
-		start = runSim(start)
-	}
-	return start
 }
 
 func simulate(initialSchool []Fish, days int) []*Fish {
