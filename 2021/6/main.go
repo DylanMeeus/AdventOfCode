@@ -8,7 +8,7 @@ import (
 )
 
 type Fish struct {
-	Timer int
+	Timer int8
 }
 
 func (f *Fish) Tick() bool {
@@ -28,11 +28,12 @@ func spawn() *Fish {
 
 func main() {
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 func getData() []Fish {
 
-	input, _ := ioutil.ReadFile("./input.txt")
+	input, _ := ioutil.ReadFile("./test_input.txt")
 
 	in := strings.Replace(string(input), "\n", "", -1)
 	stringFishParts := strings.Split(in, ",")
@@ -43,7 +44,7 @@ func getData() []Fish {
 		if err != nil {
 			panic(err)
 		}
-		school[i] = Fish{Timer: intTimer}
+		school[i] = Fish{Timer: int8(intTimer)}
 	}
 
 	return school
@@ -52,6 +53,12 @@ func getData() []Fish {
 func solve() int {
 	data := getData()
 	school := simulate(data, 80)
+	return len(school)
+}
+
+func solve2() int {
+	data := getData()
+	school := simulate(data, 256)
 	return len(school)
 }
 
@@ -66,13 +73,11 @@ func copyMutable(school []Fish) []*Fish {
 func simulate(initialSchool []Fish, days int) []*Fish {
 	school := copyMutable(initialSchool)
 	for day := 0; day < days; day++ {
-
 		for _, fish := range school {
 			if givesBirth := fish.Tick(); givesBirth {
 				school = append(school, spawn())
 			}
 		}
-
 	}
 
 	return school
