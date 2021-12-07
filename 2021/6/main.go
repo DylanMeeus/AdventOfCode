@@ -33,7 +33,7 @@ func main() {
 
 func getData() []Fish {
 
-	input, _ := ioutil.ReadFile("./test_input.txt")
+	input, _ := ioutil.ReadFile("./input.txt")
 
 	in := strings.Replace(string(input), "\n", "", -1)
 	stringFishParts := strings.Split(in, ",")
@@ -69,15 +69,27 @@ func solve2() int {
 	return sum
 }
 
+type T struct {
+	daysleft, start int
+}
+
+var memo = map[T]int{}
+
 func recursiveSpawn(days_left, start int) int {
 	if days_left < start {
 		return 0
+	}
+
+	if val, ok := memo[T{days_left, start}]; ok {
+		return val
 	}
 
 	total := 0
 	for i := start; i < days_left; i += 7 {
 		total += 1 + recursiveSpawn(days_left-i, 9)
 	}
+
+	memo[T{days_left, start}] = total
 	return total
 }
 
