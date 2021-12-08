@@ -10,6 +10,7 @@ import (
 
 func main() {
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 func getData() []int {
@@ -35,7 +36,7 @@ func solve() int {
 
 	minCost := int(10e7)
 	for ; lower < higher; lower++ {
-		cost := getCost(crabs, lower)
+		cost := getConstantCost(crabs, lower)
 		if cost < minCost {
 			minCost = cost
 		}
@@ -44,10 +45,33 @@ func solve() int {
 
 }
 
-func getCost(crabs []int, position int) int {
+func solve2() int {
+	crabs := getData()
+	lower, higher := min(crabs), max(crabs)
+
+	minCost := int(10e9)
+	for ; lower < higher; lower++ {
+		cost := getCumulativeCost(crabs, lower)
+		if cost < minCost {
+			minCost = cost
+		}
+	}
+	return minCost
+}
+
+func getConstantCost(crabs []int, position int) int {
 	totalCost := 0
 	for _, c := range crabs {
 		totalCost += int(math.Abs(float64(position - c)))
+	}
+	return totalCost
+}
+
+func getCumulativeCost(crabs []int, position int) int {
+	totalCost := 0
+	for _, c := range crabs {
+		distance := int(math.Abs(float64(position - c)))
+		totalCost += (distance * (distance + 1)) / 2
 	}
 	return totalCost
 }
