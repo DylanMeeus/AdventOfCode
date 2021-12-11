@@ -41,6 +41,7 @@ func (o octopi) flash(p point, hasFlashed map[point]bool) {
 
 func main() {
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 func getData() octopi {
@@ -84,6 +85,26 @@ func solve() int {
 	}
 
 	return flashCount
+}
+
+func solve2() int {
+	data := getData()
+
+	step := 0
+	flashSet := map[point]bool{}
+	for len(flashSet) != 100 {
+		flashSet = map[point]bool{}
+		for row := 0; row < len(data); row++ {
+			for col := 0; col < len(data); col++ {
+				p := point{row, col}
+				data.levelUp(p, flashSet)
+			}
+		}
+		step++
+		fmt.Println(step)
+	}
+
+	return step
 }
 
 func neighbours(p point) []point {
