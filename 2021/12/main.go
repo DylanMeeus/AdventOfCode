@@ -8,6 +8,7 @@ import (
 
 func main() {
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 // build the adjacency map
@@ -35,6 +36,84 @@ func solve() int {
 	state := [][]string{}
 	trace("start", data, []string{}, &state)
 	return len(state)
+}
+
+func solve2() int {
+	data := getData()
+	state := [][]string{}
+	trace2("start", data, []string{}, &state, map[string]int{})
+
+	for _, path := range state {
+		fmt.Printf("%v\n", path)
+	}
+
+	return len(state)
+}
+
+func trace2(node string, adj map[string][]string, currentPath []string,
+	state *[][]string,
+	visitedCount map[string]int) {
+	currentPath = append(currentPath, node)
+	visitedCount[node]++
+
+	if node == "end" {
+		*state = append(*state, currentPath)
+		return
+	}
+
+	for _, connection := range adj[node] {
+		if isValidMove(visitedCount, connection) {
+			copyPath := make([]string, len(currentPath))
+			copy(copyPath, currentPath)
+			trace2(connection, adj, copyPath, state, copyMap(visitedCount))
+		}
+	}
+}
+
+func copyMap(origin map[string]int) map[string]int {
+	clone := map[string]int{}
+
+	for k, v := range origin {
+		clone[k] = v
+	}
+	return clone
+}
+
+func isValidMove(m map[string]int, target string) bool {
+	if target == "start" {
+		return false
+	}
+
+	if strings.ToUpper(target) == target {
+		return true
+	}
+
+	count := m[target]
+	if count == 0 {
+		return true
+	}
+
+	if count >= 2 {
+		return false
+	}
+
+	// else it's only valid if this has less counts than other small caves
+	// we know there's only one count now
+
+	if count != 1 {
+		// sanity check "assert style"
+		panic(count)
+	}
+
+	for k, v := range m {
+		if strings.ToUpper(k) == k {
+			continue
+		}
+		if v > 1 && k != target {
+			return false
+		}
+	}
+	return true
 }
 
 func trace(node string, adj map[string][]string, currentPath []string, state *[][]string) {
