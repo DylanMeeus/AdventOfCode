@@ -41,6 +41,7 @@ var (
 
 func main() {
 	fmt.Printf("%v\n", solve())
+	fmt.Printf("%v\n", solve2())
 }
 
 func getData() Target { return INPUT }
@@ -60,6 +61,23 @@ func solve() int {
 	}
 
 	return maxY
+}
+
+func solve2() int {
+	area := getData()
+
+	BOUND := 4000
+	hitsTarget := map[Point]bool{}
+	for xVel := 0; xVel < BOUND; xVel++ {
+		for yVel := -BOUND; yVel < BOUND; yVel++ {
+			_, ok := shoot(Velocity{xVel, yVel}, area)
+			if ok {
+				hitsTarget[Point{xVel, yVel}] = true
+			}
+		}
+	}
+
+	return len(hitsTarget)
 }
 
 // shoot fires the probe at initial velocity (starting at <0,0>)
