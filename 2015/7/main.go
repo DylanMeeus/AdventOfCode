@@ -32,15 +32,6 @@ var (
 	constantWirePrefix  = "C_"
 )
 
-type valueProvider interface {
-	getValue() uint16
-}
-
-// signalEmitter always emits a constant signal...
-type signalEmitter struct {
-	signal uint16
-}
-
 type wire struct {
 	name  string
 	value uint16
@@ -53,14 +44,6 @@ type gate struct {
 	operation    gateType
 	initialValue uint16 // for rshift / lshift modifiers, so this is optional
 }
-
-type node struct {
-	gate     *gate
-	wire     *wire
-	children []*node
-}
-
-// we have to construct a bunch of wires and gates together...
 
 func main() {
 	solve()
@@ -162,7 +145,7 @@ func createConstantWire(s string) *wire {
 	return &wire{name: name, value: uint16(value), isSet: true}
 }
 
-func createWiresV2(lines []string) ([]*wire, []string) {
+func createWires(lines []string) ([]*wire, []string) {
 	wires := []*wire{}
 	newLines := []string{}
 	for _, line := range lines {
@@ -192,55 +175,6 @@ func createWiresV2(lines []string) ([]*wire, []string) {
 		newLines = append(newLines, strings.Join(newparts, " "))
 	}
 	return wires, newLines
-}
-
-func createWires(lines []string) []*wire {
-	wires := []*wire{}
-	for _, line := range lines {
-		if line == "" {
-			continue
-		}
-
-		parts := strings.Split(line, " ")
-		isInput := len(parts) == 3
-		if isInput {
-			wireIn := parts[0]
-			if isConstant(wireIn) {
-				wires = append(wires, createConstantWire(wireIn))
-			} else {
-				if w := getWire(wires, wireIn); w == nil {
-					wires = append(wires, &wire{name: wireIn, value: 0})
-				}
-			}
-			wireOut := parts[2]
-			if isConstant(wireOut) {
-				wires = append(wires, createConstantWire(wireOut))
-			} else {
-				if w := getWire(wires, wireOut); w == nil {
-					wires = append(wires, &wire{name: wireOut, value: 0})
-				}
-			}
-
-		} else {
-			for _, part := range parts {
-				isOperator := part == "NOT" || part == "RSHIFT" || part == "LSHIFT" || part == "AND" || part == "OR"
-				isArrow := part == "->"
-				isDigit := func() bool {
-					_, err := strconv.Atoi(part)
-					return err == nil
-				}()
-				isWire := !isOperator && !isArrow && !isDigit
-				if isWire {
-					if getWire(wires, part) == nil {
-						wires = append(wires, &wire{name: part, value: 0})
-					}
-				} else if isConstant(part) {
-					wires = append(wires, createConstantWire(part))
-				}
-			}
-		}
-	}
-	return wires
 }
 
 // createGates constructs the actual logic gates. This expects an exhaustive list of all wires to be
@@ -318,49 +252,7 @@ func panicIfErr(err error) {
 }
 
 func parseToWireAndGate(lines []string) ([]*wire, []*gate) {
-	wires, newLines := createWiresV2(lines)
+	wires, newLines := createWires(lines)
 	gates := createGates(newLines, wires)
 	return wires, gates
-}
-
-func parseInput(in []string) (graph map[string][]string, inputs map[string]uint16) {
-	graph = map[string][]string{}
-	inputs = map[string]uint16{}
-	for _, line := range in {
-		if line == "" {
-			continue
-		}
-
-		parts := strings.Split(line, " ")
-		isInput := len(parts) == 3
-		if isInput {
-			value, err := strconv.Atoi(parts[0])
-			if err != nil {
-				panic(err)
-			}
-			inputs[parts[2]] = uint16(value)
-		} else if len(parts) == 5 {
-			// this is an "operator" mapping
-			OP := parts[1]
-			switch OP {
-			case "OR":
-				fallthrough
-			case "AND":
-				nodeName := parts[1] + parts[0] + parts[2]
-				graph[parts[0]] = append(graph[parts[0]], nodeName)
-				graph[parts[2]] = append(graph[parts[2]], nodeName)
-				graph[nodeName] = []string{parts[4]}
-			case "LSHIFT":
-				fallthrough
-			case "RSHIFT":
-				nodeName := parts[1] + parts[0] + parts[2]
-				graph[parts[0]] = append(graph[parts[0]], nodeName)
-				graph[parts[2]] = append(graph[parts[2]], nodeName)
-				graph[nodeName] = []string{parts[3]}
-			}
-
-		}
-	}
-
-	return
 }
