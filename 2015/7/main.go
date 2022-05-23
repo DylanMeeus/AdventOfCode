@@ -105,7 +105,7 @@ func solve() {
 }
 
 func getInput() []string {
-	bts, err := ioutil.ReadFile("./input.txt")
+	bts, err := ioutil.ReadFile("./input2.txt")
 
 	if err != nil {
 		panic(err)
