@@ -15,7 +15,7 @@ const (
 	NOT
 	RSHIFT
 	LSHIFT
-	NOOP // not really a gate, but we have "passthrough" values here
+	TRANSFER // not really a gate, but we have "passthrough" values here
 )
 
 var (
@@ -25,7 +25,7 @@ var (
 		"NOT":    NOT,
 		"RSHIFT": RSHIFT,
 		"LSHIFT": LSHIFT,
-		"->":     NOOP,
+		"->":     TRANSFER, // copy value from one wire to another as-is
 	}
 
 	constantWireCounter = 0
@@ -75,7 +75,6 @@ func solve() {
 
 	for _, gate := range gates {
 		// try to resolve it
-		fmt.Printf("%v %v\n", *gate.input[1], *gate.output)
 		if gate.output.value == 0 {
 			switch gate.operation {
 			case AND:
@@ -83,12 +82,12 @@ func solve() {
 			case OR:
 				gate.output.value = gate.input[0].value | gate.input[1].value
 			case RSHIFT:
-				gate.output.value = gate.input[0].value >> gate.initialValue
+				gate.output.value = gate.input[0].value >> gate.input[1].value
 			case LSHIFT:
-				gate.output.value = gate.input[0].value << gate.initialValue
+				gate.output.value = gate.input[0].value << gate.input[1].value
 			case NOT:
 				gate.output.value = ^gate.input[0].value // XOR with FF to get bitwise NOT
-			case NOOP:
+			case TRANSFER:
 				gate.output.value = gate.input[0].value
 			}
 		}
@@ -154,9 +153,40 @@ func createConstantWire(s string) *wire {
 	return &wire{name: name, value: uint16(value)}
 }
 
-func createWires(lines []string) []*wire {
+func createWiresV2(lines []string) ([]*wire, []string) {
 	wires := []*wire{}
 	newLines := []string{}
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+
+		parts := strings.Split(line, " ")
+		newparts := []string{}
+		for _, part := range parts {
+			isOperator := part == "NOT" || part == "RSHIFT" || part == "LSHIFT" || part == "AND" || part == "OR"
+			isArrow := part == "->"
+			isWire := !isOperator && !isArrow && !isConstant(part)
+			if isWire {
+				if getWire(wires, part) == nil {
+					wires = append(wires, &wire{name: part, value: 0})
+				}
+				newparts = append(newparts, part)
+			} else if isConstant(part) {
+				cw := createConstantWire(part)
+				wires = append(wires, cw)
+				newparts = append(newparts, cw.name)
+			} else {
+				newparts = append(newparts, part)
+			}
+		}
+		newLines = append(newLines, strings.Join(newparts, " "))
+	}
+	return wires, newLines
+}
+
+func createWires(lines []string) []*wire {
+	wires := []*wire{}
 	for _, line := range lines {
 		if line == "" {
 			continue
@@ -216,6 +246,10 @@ func createGates(lines []string, wires []*wire) []*gate {
 
 		parts := strings.Split(line, " ")
 		if len(parts) == 3 {
+			// transfer stuff
+			wireIn1 := getWire(wires, parts[0])
+			wireOut := getWire(wires, parts[2])
+			gates = append(gates, &gate{input: []*wire{wireIn1}, output: wireOut, operation: TRANSFER})
 			continue
 		} else if len(parts) == 5 {
 			// this is an "operator" mapping
@@ -242,14 +276,14 @@ func createGates(lines []string, wires []*wire) []*gate {
 			case "RSHIFT":
 				op := gateTypeMapping[OP]
 				wireIn1 := getWire(wires, parts[0])
+				wireIn2 := getWire(wires, parts[2])
 				wireOut := getWire(wires, parts[4])
-				initialValue, err := strconv.Atoi(parts[2])
-				panicIfErr(err)
+
 				gates = append(gates, &gate{
-					input:        []*wire{wireIn1},
+					input:        []*wire{wireIn1, wireIn2},
 					output:       wireOut,
 					operation:    op,
-					initialValue: uint16(initialValue),
+					initialValue: 0,
 				})
 			}
 		} else {
@@ -274,10 +308,10 @@ func panicIfErr(err error) {
 	}
 }
 
-func parseToWireAndGate(lines []string) (wires []*wire, gates []*gate) {
-	wires = createWires(lines)
-	gates = createGates(lines, wires)
-	return
+func parseToWireAndGate(lines []string) ([]*wire, []*gate) {
+	wires, newLines := createWiresV2(lines)
+	gates := createGates(newLines, wires)
+	return wires, gates
 }
 
 func parseInput(in []string) (graph map[string][]string, inputs map[string]uint16) {
