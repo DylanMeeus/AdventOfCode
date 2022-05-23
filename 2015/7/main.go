@@ -15,6 +15,7 @@ const (
 	NOT
 	RSHIFT
 	LSHIFT
+	NOOP // not really a gate, but we have "passthrough" values here
 )
 
 var (
@@ -24,8 +25,21 @@ var (
 		"NOT":    NOT,
 		"RSHIFT": RSHIFT,
 		"LSHIFT": LSHIFT,
+		"->":     NOOP,
 	}
+
+	constantWireCounter = 0
+	constantWirePrefix  = "C_"
 )
+
+type valueProvider interface {
+	getValue() uint16
+}
+
+// signalEmitter always emits a constant signal...
+type signalEmitter struct {
+	signal uint16
+}
 
 type wire struct {
 	name  string
@@ -54,13 +68,14 @@ func main() {
 func solve() {
 	wires, gates := parseToWireAndGate(getInput())
 	_ = wires
-	//printWires(wires)
+	printWires(wires)
 	//printGates(gates)
 
 	// solve for the gates..
 
 	for _, gate := range gates {
 		// try to resolve it
+		fmt.Printf("%v %v\n", *gate.input[1], *gate.output)
 		if gate.output.value == 0 {
 			switch gate.operation {
 			case AND:
@@ -73,6 +88,8 @@ func solve() {
 				gate.output.value = gate.input[0].value << gate.initialValue
 			case NOT:
 				gate.output.value = ^gate.input[0].value // XOR with FF to get bitwise NOT
+			case NOOP:
+				gate.output.value = gate.input[0].value
 			}
 		}
 	}
@@ -81,7 +98,7 @@ func solve() {
 }
 
 func getInput() []string {
-	bts, err := ioutil.ReadFile("./input.txt")
+	bts, err := ioutil.ReadFile("./test_input.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -120,8 +137,26 @@ func printGates(gs []*gate) {
 	}
 }
 
+// hacky way to determine if input represents a constant..
+func isConstant(s string) bool {
+	if _, err := strconv.Atoi(s); err == nil {
+		return true
+	}
+	return false
+}
+
+func createConstantWire(s string) *wire {
+	value, err := strconv.Atoi(s)
+	panicIfErr(err)
+
+	name := constantWirePrefix + strconv.Itoa(constantWireCounter)
+	constantWireCounter++
+	return &wire{name: name, value: uint16(value)}
+}
+
 func createWires(lines []string) []*wire {
 	wires := []*wire{}
+	newLines := []string{}
 	for _, line := range lines {
 		if line == "" {
 			continue
@@ -130,12 +165,23 @@ func createWires(lines []string) []*wire {
 		parts := strings.Split(line, " ")
 		isInput := len(parts) == 3
 		if isInput {
-			fmt.Println(line)
-			value, err := strconv.Atoi(parts[0])
-			if err != nil {
-				panic(err)
+			wireIn := parts[0]
+			if isConstant(wireIn) {
+				wires = append(wires, createConstantWire(wireIn))
+			} else {
+				if w := getWire(wires, wireIn); w == nil {
+					wires = append(wires, &wire{name: wireIn, value: 0})
+				}
 			}
-			wires = append(wires, &wire{name: parts[2], value: uint16(value)})
+			wireOut := parts[2]
+			if isConstant(wireOut) {
+				wires = append(wires, createConstantWire(wireOut))
+			} else {
+				if w := getWire(wires, wireOut); w == nil {
+					wires = append(wires, &wire{name: wireOut, value: 0})
+				}
+			}
+
 		} else {
 			for _, part := range parts {
 				isOperator := part == "NOT" || part == "RSHIFT" || part == "LSHIFT" || part == "AND" || part == "OR"
@@ -149,6 +195,8 @@ func createWires(lines []string) []*wire {
 					if getWire(wires, part) == nil {
 						wires = append(wires, &wire{name: part, value: 0})
 					}
+				} else if isConstant(part) {
+					wires = append(wires, createConstantWire(part))
 				}
 			}
 		}
@@ -178,6 +226,9 @@ func createGates(lines []string, wires []*wire) []*gate {
 			case "AND":
 				op := gateTypeMapping[OP]
 				wireIn1 := getWire(wires, parts[0])
+				if wireIn1 == nil {
+					panic(fmt.Sprintf("no wire found for %v\nline:%v\n", parts[0], line))
+				}
 				wireIn2 := getWire(wires, parts[2])
 				wireOut := getWire(wires, parts[4])
 				gates = append(gates, &gate{
