@@ -44,6 +44,7 @@ type signalEmitter struct {
 type wire struct {
 	name  string
 	value uint16
+	isSet bool
 }
 
 type gate struct {
@@ -67,15 +68,19 @@ func main() {
 
 func solve() {
 	wires, gates := parseToWireAndGate(getInput())
-	_ = wires
-	printWires(wires)
-	//printGates(gates)
-
 	// solve for the gates..
 
-	for _, gate := range gates {
-		// try to resolve it
-		if gate.output.value == 0 {
+	wireA := getWire(wires, "a")
+
+	for !wireA.isSet {
+
+		for _, gate := range gates {
+			// try to resolve it
+
+			if gate.output.isSet || !gate.input[0].isSet || (len(gate.input) == 2 && !gate.input[1].isSet) {
+				continue
+			}
+
 			switch gate.operation {
 			case AND:
 				gate.output.value = gate.input[0].value & gate.input[1].value
@@ -90,14 +95,18 @@ func solve() {
 			case TRANSFER:
 				gate.output.value = gate.input[0].value
 			}
+
+			gate.output.isSet = true
 		}
 	}
 
 	printWires(wires)
+	fmt.Printf("a: %v\n", wireA.value)
 }
 
 func getInput() []string {
-	bts, err := ioutil.ReadFile("./test_input.txt")
+	bts, err := ioutil.ReadFile("./input.txt")
+
 	if err != nil {
 		panic(err)
 	}
@@ -150,7 +159,7 @@ func createConstantWire(s string) *wire {
 
 	name := constantWirePrefix + strconv.Itoa(constantWireCounter)
 	constantWireCounter++
-	return &wire{name: name, value: uint16(value)}
+	return &wire{name: name, value: uint16(value), isSet: true}
 }
 
 func createWiresV2(lines []string) ([]*wire, []string) {
