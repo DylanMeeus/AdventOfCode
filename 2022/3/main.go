@@ -8,6 +8,38 @@ import (
 
 func main() {
 	fmt.Println(solve1())
+	fmt.Println(solve2())
+}
+func solve2() int {
+	data := getData()
+
+	sum := 0
+
+	for i := 0; i < len(data)-1; i += 3 {
+		char := findCommon(data[i], data[i+1], data[i+2])
+		var priority int
+		if char > 90 {
+			priority = int(char - 96)
+		} else {
+			priority = int(26 + (char - 64))
+		}
+		sum += priority
+	}
+
+	return sum
+}
+
+func findCommon(a, b, c string) rune {
+	for _, x := range a {
+		for _, y := range b {
+			for _, z := range c {
+				if x == y && y == z {
+					return x
+				}
+			}
+		}
+	}
+	panic("should not be here")
 }
 
 func solve1() int {
