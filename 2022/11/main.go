@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 var (
-	numberRegex = regexp.MustCompile(`\d`)
+	numberRegex = regexp.MustCompile(`[0-9]+`)
 )
 
 type Monkey struct {
@@ -26,18 +27,60 @@ func main() {
 }
 
 func solve1() int {
-	getData()
-	return 0
+	monkeys := getData()
+	monkeyID := 0
+	next := func() {
+		monkeyID++
+		if monkeyID > len(monkeys)-1 {
+			monkeyID = 0
+		}
+	}
+
+	inspections := map[int]int{}
+
+	for round := 0; round < 20; round++ {
+		for turn := 0; turn < len(monkeys); turn++ {
+			currentMonkey := monkeys[monkeyID]
+			for !currentMonkey.Items.Empty() {
+				item, ok := currentMonkey.Items.Pop()
+				if ok {
+					inspections[currentMonkey.ID]++
+					item = currentMonkey.Operation(item)
+					item /= 3
+					if item%currentMonkey.TestDiv == 0 {
+						monkeys[currentMonkey.Ytarget].Items.Push(item)
+					} else {
+						monkeys[currentMonkey.Ntarget].Items.Push(item)
+					}
+				}
+			}
+			next()
+		}
+	}
+
+	out := []int{}
+	for _, value := range inspections {
+		out = append(out, value)
+	}
+
+	sort.Ints(out)
+
+	return out[len(out)-1] * out[len(out)-2]
 }
 
-func getData() {
+func getData() []Monkey {
 	f, err := ioutil.ReadFile("./input.txt")
 	handleError(err)
 	lines := strings.Split(string(f), "\n")
 
+	monkeys := []Monkey{}
+
 	for i := 0; i < len(lines)-5; i += 6 {
-		parseMonkey(lines[i : i+6])
+		monkeys = append(monkeys, parseMonkey(lines[i:i+6]))
 	}
+
+	fmt.Println(monkeys)
+	return monkeys
 }
 
 func removeSpace(s string) string {
