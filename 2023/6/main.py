@@ -1,4 +1,4 @@
-
+from functools import reduce
 
 
 
@@ -33,9 +33,26 @@ def solve1(pairs) -> int :
     return _mult
 
 
+
+def solve2(time, distance) -> int :
+    ways = 0
+    for x in range(1, time):
+        lap_distance = simulate_distance(x, time, distance)
+        is_win = lap_distance > distance
+        if is_win:
+            ways += 1
+    return ways
+
+
+    return _mult
 if __name__ == '__main__':
     inputs = open('input.txt').read().split("\n")
     times = list(map(lambda k: int(k), filter(lambda k: k != '', inputs[0][len("Time:"):].split(" "))))
     distance = list(map(lambda k: int(k), filter(lambda k: k != '', inputs[1][len("Distance:"):].split(" "))))
     pairs = list(zip(times,distance))
     print(solve1(pairs))
+
+    ### for part two
+    times = "".join(list(reduce(lambda k, x: k + x, filter(lambda k: k != '', inputs[0][len("Time:"):].split(" ")))))
+    distance = "".join(list(reduce(lambda k, x: k + x, filter(lambda k: k != '', inputs[1][len("Distance:"):].split(" ")))))
+    print(solve2(int(times), int(distance)))
