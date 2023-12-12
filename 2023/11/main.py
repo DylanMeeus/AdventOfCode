@@ -135,7 +135,7 @@ if __name__ == '__main__':
     U = parse_to_array(lines)
     expanded, rows, cols = expand_universe(U)
     expanded = expanded.split("\n")
-    print(solve1(to_graph(U)))
+    print(solve1(to_graph(expanded)))
     print(solve2(to_graph(U), rows, cols))
 
     
