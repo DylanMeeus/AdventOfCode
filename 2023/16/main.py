@@ -1,6 +1,12 @@
 from enum import Enum
 
 
+TEST = False
+
+HEIGHT = 10 if TEST else 100
+WIDTH = 10 if TEST else 100
+
+
 class Direction(Enum):
     UP = 1,
     DOWN = 2,
@@ -118,39 +124,62 @@ def solve1(G):
                         new_beams.add(new_beam)
 
         beams = new_beams
-        print(len(E))
-        print(len(new_beams))
         if len(new_beams) == 0:
-            print('no more active beams')
             return len(E)
 
     print('done running')
     print_E(E)
     return len(E)
 
-def solve2():
 
-    beams = {Beam((0,0), Direction.DOWN)}
+def generate_start_configs():
+    left_top = {Beam((0,0), Direction.DOWN), Beam((0,0), Direction.RIGHT)}
+    right_top = {Beam((0,WIDTH), Direction.DOWN), Beam((0,WIDTH), Direction.LEFT)}
+    bottom_left = {Beam((HEIGHT,0), Direction.UP), Beam((HEIGHT,0), Direction.RIGHT)}
+    bottom_right = {Beam((HEIGHT,WIDTH), Direction.UP), Beam((HEIGHT, WIDTH), Direction.LEFT)}
 
-    E = set()
+    configs = [left_top, right_top, bottom_left, bottom_right]
 
-    for i in range(0, 1000):
-        new_beams = set()
-        for b in beams:
-            E.add(b.loc)
-            if b.active:
-                new_beams.add(b)
-                output = b.move(G)
-                if output is not None:
-                    for new_beam in output:
-                        new_beams.add(new_beam)
+    for i in range(1, WIDTH - 1):
+        top = {Beam((0,i), Direction.DOWN)}
+        bottom = {Beam((HEIGHT,i), Direction.UP)}
+        configs.append(top)
+        configs.append(bottom)
+    return configs
 
-        beams = new_beams
-        print(len(E))
-        if len(new_beams) == 0:
-            return len(E)
 
-    return len(E)
+
+def solve2(G):
+
+
+    max_E = 0
+
+    confs = generate_start_configs()
+
+
+    for config in confs:
+        for start_config in config:
+            E = set()
+            beams = {start_config}
+            for i in range(0, 1000):
+                new_beams = set()
+                for b in beams:
+                    E.add(b.loc)
+                    if b.active:
+                        new_beams.add(b)
+                        output = b.move(G)
+                        if output is not None:
+                            for new_beam in output:
+                                new_beams.add(new_beam)
+
+                beams = new_beams
+                print(len(E))
+                if len(new_beams) == 0:
+                    if len(E) > max_E:
+                        max_E = len(E)
+                    break
+
+    return max_E
 
 def print_E(E):
     out = ""
@@ -179,3 +208,4 @@ if __name__ == '__main__':
     lines = open('input.txt').read().split('\n')
     G = parse(lines)
     print(f'output : {solve1(G)} ')
+    print(f'output2: {solve2(G)} ')
