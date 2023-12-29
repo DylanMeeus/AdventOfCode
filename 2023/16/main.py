@@ -23,8 +23,11 @@ class Beam:
     def __init__(self, location, direction, path = None):
         self.loc = location
         self.dir = direction
-        self.active = True
-        self.path = set() if path is None else path
+        self.active = True 
+        H = (self.loc, self.dir)
+        if path is not None and H in path:
+            self.active = False
+        self.path = set() if path == None else path
 
     def path_changed(self):
         H = (self.loc, self.dir)
@@ -36,7 +39,7 @@ class Beam:
 
 
     def move(self, G):
-        self.path.add(self.loc)
+        self.path_changed()
         next_tile = next_pos(self.loc, self.dir)
 
         if self.active == False:
@@ -116,10 +119,50 @@ def solve1(G):
 
         beams = new_beams
         print(len(E))
+        print(len(new_beams))
+        if len(new_beams) == 0:
+            print('no more active beams')
+            return len(E)
+
+    print('done running')
+    print_E(E)
+    return len(E)
+
+def solve2():
+
+    beams = {Beam((0,0), Direction.DOWN)}
+
+    E = set()
+
+    for i in range(0, 1000):
+        new_beams = set()
+        for b in beams:
+            E.add(b.loc)
+            if b.active:
+                new_beams.add(b)
+                output = b.move(G)
+                if output is not None:
+                    for new_beam in output:
+                        new_beams.add(new_beam)
+
+        beams = new_beams
+        print(len(E))
         if len(new_beams) == 0:
             return len(E)
 
     return len(E)
+
+def print_E(E):
+    out = ""
+    for row in range(0, 10):
+        for col in range(0, 10):
+            H = (row, col)
+            if H in E:
+                out += "#"
+            else:
+                out += "."
+        out += "\n"
+    print(out)
 
 
 def parse(lines):
