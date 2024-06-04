@@ -25,6 +25,13 @@ getSides b =
         z = (2 * h b * l b)
     in (x,y,z)
 
+getPerimeters :: Box -> (Int, Int, Int)
+getPerimeters b =
+    let x = (2 * l b + 2 * w b)
+        y = (2 * w b + 2 * h b)
+        z = (2 * l b + 2 * h b)
+    in (x,y,z)
+
 
 surfaceArea :: Box -> Int
 surfaceArea b = 
@@ -39,6 +46,10 @@ smallestSide b =
 neededPaper :: Box -> Int
 neededPaper b = surfaceArea b + smallestSide b
 
+neededRibbon :: Box -> Int
+neededRibbon box = 
+    let (a,b,c) = getPerimeters box
+    in (minimum [a,b,c]) + (w box * l box * h box)
 
 split str = case break (== 'x') str of
     (a, 'x': b) -> a : split b
@@ -53,11 +64,15 @@ lineToBox line =
 --solve1 :: [String] -> Int
 solve1 lines = foldl1 (+) $ map(\x -> neededPaper (lineToBox x)) lines
 
+solve2 lines = foldl1 (+) $ map(\x -> neededRibbon (lineToBox x)) lines
+
 main :: IO ()
 main = do
     handle <- openFile "input.txt" ReadMode
     contents <- hGetContents handle
     let linesOfFile = lines contents
-    let result = (solve1 linesOfFile)
-    putStrLn $ show result
+    let result1 = (solve1 linesOfFile)
+    let result2 = (solve2 linesOfFile)
+    putStrLn $ show result1
+    putStrLn $ show result2
     hClose handle
