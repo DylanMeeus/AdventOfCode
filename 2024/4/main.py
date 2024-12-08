@@ -34,6 +34,44 @@ def solve1(point_cloud):
     return count
 
 
+def safe_get(m, p) -> str:
+    if p in m:
+        return m[p]
+    return "_"
+
+def solve2(point_cloud):
+    # filter for 'A'
+    count = 0
+    for point, value in point_cloud.items():
+        if value == "A":
+            top_left = Point(point.row-1, point.col-1)
+            top_right = Point(point.row - 1, point.col + 1)
+            bottom_left = Point(point.row + 1, point.col - 1)
+            bottom_right = Point(point.row + 1, point.col + 1)
+            f = lambda k: safe_get(point_cloud, k)
+
+        
+        ###
+        # M  M    S  S   M  S   S  M
+        # S  S    M  M   M  S   S  M
+            if f(top_left) == 'M' and f(top_right) == 'M' and f(bottom_left) == 'S' and f(bottom_right) == 'S':
+                count += 1
+
+            if f(top_left) == 'S' and f(top_right) == 'S' and f(bottom_left) == 'M' and f(bottom_right) == 'M':
+                count += 1
+
+            if f(top_left) == 'M' and f(top_right) == 'S' and f(bottom_left) == 'M' and f(bottom_right) == 'S':
+                count += 1
+
+            if f(top_left) == 'S' and f(top_right) == 'M' and f(bottom_left) == 'S' and f(bottom_right) == 'M':
+                count += 1
+
+    return count
+
+
+
+
+
 def get_string(point_cloud, points) -> str:
     out = "" 
     for point in points:
@@ -122,3 +160,4 @@ def get_input() -> [str]:
 if __name__ == '__main__':
     mapped = to_map(get_input())
     print(solve1(mapped))
+    print(solve2(mapped))
