@@ -29,8 +29,9 @@ def solve1(rules, pages) -> int:
 
 
 def no_edge(S, G) -> int:
-    for value in S:
-        if not G in 
+    for node in S:
+        if node not in G or G[node] == []:
+            return node
 
 
 def fix_page_set(page_set, rules) -> [int]:
@@ -42,16 +43,26 @@ def fix_page_set(page_set, rules) -> [int]:
     for page in page_set:
         nub_values.add(page)
         if page in rules:
-            G[page] = []
             for value in rules[page]:
                 if value in page_set:
-                    G[page].append(value)
+                    if value not in G:
+                        G[value] = [] 
+                    G[value].append(page)
+    #print(G)
+    out_graph = []
+    while len(out_graph) <= (len(page_set) // 2):
+        fetch_node = no_edge(nub_values, G)
+        out_graph.append(fetch_node)
+        nub_values.remove(fetch_node)
+        # now also remove all edges pointing to this.. ?
+        for key in G:
+            if fetch_node in G[key]:
+                G[key].remove(fetch_node)
 
     # now build the page_set in reverse against G, by finding the node with no "After" (edge)
     # then delete this node from all rules.. 
 
-
-    return page_set
+    return out_graph
 
 
 def solve2(rules, pages) -> int:
@@ -69,8 +80,7 @@ def solve2(rules, pages) -> int:
             seen.add(page)
         if not valid_page_set:
             page_set = fix_page_set(page_set, rules)
-            mid = len(page_set) // 2
-            result += page_set[mid]
+            result += page_set[len(page_set)-1]
 
 
 
@@ -79,7 +89,7 @@ def solve2(rules, pages) -> int:
 
 def get_input():
     # parse out the input in 'rules' and 'actual input'
-    lines = open('test_input.txt').read().split('\n')
+    lines = open('input.txt').read().split('\n')
 
     pages = []
     # rules encodes a key (after) a value (before)
@@ -106,7 +116,6 @@ def get_input():
 
 if __name__ == '__main__':
     r, p = get_input()
-    print(r)
-    print(solve1(r,p))
+    #print(solve1(r,p))
     print(solve2(r,p))
 
