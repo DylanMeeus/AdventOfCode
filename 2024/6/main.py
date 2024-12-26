@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from enum import Enum
 
@@ -40,6 +41,12 @@ class Guard:
     position: Point
     direction: Direction
 
+@dataclass(frozen=True)
+class HashableGuard:
+    position: Point
+    direction: Direction
+
+
 
 def get_input():
     """ parse the input as a point-map """ 
@@ -67,7 +74,7 @@ def next_position(guard) -> Point:
 
 
 
-def solve1(M, guard) -> int:
+def solve1(M, guard) -> (int, set):
     """ move the guard until she's out of the map.. """
 
     visited = set()
@@ -76,7 +83,7 @@ def solve1(M, guard) -> int:
     while True:
         next_pos = next_position(guard)
         if next_pos not in M:
-            return len(visited)
+            return len(visited), visited
         elif M[next_pos] == ".":
             guard.position = next_pos
             visited.add(guard.position)
@@ -86,6 +93,40 @@ def solve1(M, guard) -> int:
     
     exit("should not reach this")
 
+
+def is_looping(M, guard) -> bool:
+    visited = set()
+    visited.add(HashableGuard(guard.position, guard.direction))
+
+    while True:
+        next_pos = next_position(guard)
+        if next_pos not in M:
+            return False
+        if HashableGuard(next_pos, guard.direction) in visited:
+            return True
+        elif M[next_pos] == ".":
+            guard.position = next_pos
+            visited.add(HashableGuard(guard.position, guard.direction))
+        else:
+            # we hit a wall, so we turn the guard 90 degrees, without moving the guard.. 
+            guard.direction = turn[guard.direction]
+    
+
+def solve2(M, s, guard) -> int:
+    result = 0
+
+    m, n = int(math.sqrt(len(M))), int(math.sqrt(len(M)))
+
+    for idx, p in enumerate(s):
+        copy_guard = Guard(guard.position, guard.direction)
+        M[p] = '#'
+        if is_looping(M, copy_guard): 
+            result += 1
+        M[p] = '.'
+        print(f'checked {idx} of {len(s)}')
+
+
+    return result
 
 def print_map(M, visited = {}):
     for row in range(0,10):
@@ -100,5 +141,8 @@ def print_map(M, visited = {}):
 
 if __name__ == '__main__':
     M, guard = get_input()
-    print(solve1(M, guard))
+
+    result, s = (solve1(M, Guard(guard.position, guard.direction)))
+    print(result)
+    print(solve2(M, s, Guard(guard.position, guard.direction)))
 
