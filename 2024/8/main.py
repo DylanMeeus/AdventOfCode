@@ -37,7 +37,7 @@ def print_map(M, antinode_locations = {}):
         s = ""
         for col in  range(0, N):
             p = Point(row,col)
-            if p in antinode_locations:
+            if p in antinode_locations and M[p] == '.':
                 s += "#"
             else:
                 s += M[p]
@@ -77,18 +77,20 @@ def direction(p1, p2) -> Direction:
 
 
 
-def antinode_location(start, dsr, dsc, dr) -> Point:
+def antinode_location(start, dsr, dsc, dr, it = 2) -> Point:
     r, c = start.row, start.col
     new_r = r
     new_c = c
+    dsr = dsr * it
+    dsc = dsc * it
     if dr in [Direction.UP, Direction.RIGHT_UP, Direction.LEFT_UP]:
-        new_r = r + dsr * 2 
+        new_r = r + dsr 
     if dr in [Direction.DOWN, Direction.RIGHT_DOWN, Direction.LEFT_DOWN]:
-        new_r = r - dsr * 2
+        new_r = r - dsr 
     if dr in [Direction.LEFT, Direction.LEFT_DOWN, Direction.LEFT_UP]:
-        new_c = c + dsc * 2
+        new_c = c + dsc 
     if dr in [Direction.RIGHT, Direction.RIGHT_DOWN, Direction.RIGHT_UP]:
-        new_c = c - dsc * 2
+        new_c = c - dsc 
 
     return Point(new_r, new_c)
 
@@ -126,9 +128,49 @@ def solve1(data) -> int:
     return len(L)
 
 
-def solve2() -> int:
-    return 0
+def solve2(data) -> int:
+    """ we have to find all positions with antinodes.. """ 
+    """ we first have to collect all antennas by their frequency.. """
+    freq_map = {}
+    for p,f in data.items():
+        if f == '.':
+            continue
+        if f not in freq_map:
+            freq_map[f] = []
+        freq_map[f].append(p)
+
+    antinodes: [Point] = []
+
+    for freq, points in freq_map.items():
+        for point in points:
+            for other_point in points:
+                if point == other_point:
+                    continue
+                else:
+                    antinodes.append(other_point)
+                    dsr = row_distance(point, other_point)
+                    dsc = col_distance(point, other_point) 
+                    dr = direction(point, other_point)
+                    anti = antinode_location(point, dsr, dsc, dr)
+                    it = 3
+                    # as long as the generated point is in the 'map'... 
+                    while anti in data: 
+                        antinodes.append(anti)
+                        anti = antinode_location(point, dsr, dsc, dr, it)
+                        it += 1
+            
+
+    """ have to filter for ones that are in bounds still """ 
+    N = int(math.sqrt(len(data)))
+
+    print_map(data, antinodes)
+    
+    L = set(filter(lambda k: k.row >= 0 and k.row < N and k.col >= 0 and k.col < N, antinodes))
+
+    return len(L)
+
 
 if __name__ == '__main__':
     data = get_input()
     print(solve1(data))
+    print(solve2(data))
