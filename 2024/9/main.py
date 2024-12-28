@@ -1,17 +1,14 @@
-
-
-
+from typing import List
 
 def get_input() -> str:
     return open('input.txt').read()
 
 
-def compress(s: str) -> str:
+def compress(l: List[str]) -> List[str]:
     """ compress using a two-pointer approach """ 
     start = 0
-    end = len(s) - 1
+    end = len(l) - 1
 
-    l = list(s)
     while start < end: 
         if l[start] != '.':
             start += 1
@@ -27,23 +24,25 @@ def compress(s: str) -> str:
                 l[end] = copy
                 start += 1
 
-    return ''.join(l)
+    return l
 
-def expand(s: str) -> str:
-    out = ''
+def expand(s: str) -> List[str]:
+    out: List[str] = []
     idx = 0
     for i, freq in enumerate(s):
         if not freq.isdigit():
             continue
         if i % 2 == 0:
-            out += str(idx) * int(freq)
+            for i in range(0, int(freq)):
+                out.append(str(idx))
             idx += 1
         else:
-            out += "." * int(freq)
+            for i in range(0, int(freq)):
+                out.append(".")
     return out
         
 
-def checksum(data: str) -> int:
+def checksum(data: List[str]) -> int:
     out = 0
     for idx, file_id in enumerate(data):
         if file_id == '.':
