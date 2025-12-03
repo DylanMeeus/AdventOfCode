@@ -25,10 +25,10 @@ func main() {
 	/*
 		is = []instr{
 			{
-				dir: "L", val: 60,
+				dir: "R", val: 5,
 			},
 			{
-				dir: "R", val: 50,
+				dir: "L", val: 5,
 			},
 		}
 	*/
@@ -42,6 +42,7 @@ func main() {
 	//fmt.Println(solve2(is))
 
 	moves := MapToMoves(is)
+	fmt.Println(moves)
 	fmt.Println(solveAlt(moves))
 }
 
@@ -54,7 +55,7 @@ func solveAlt(moves []int) int {
 		if pos == -1 {
 			pos = 99
 		}
-		if pos == 101 {
+		if pos == 100 {
 			pos = 0
 		}
 		if pos == 0 {
