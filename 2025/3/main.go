@@ -18,8 +18,8 @@ func main() {
 	f = (findMax12("234234234234278"))
 	fmt.Println(f)
 	fmt.Println(len(strconv.Itoa(f)))
-	n := lineToTree("1234")
-	printTree(n, "")
+	//n := lineToTree("1234")
+	//printTree(n, "")
 	fmt.Println(solve2(lines))
 }
 
@@ -48,12 +48,61 @@ type Node struct {
 	Children       []*Node
 }
 
+var (
+	speedyMap = map[byte]int{
+		'0': 0,
+		'1': 1,
+		'2': 2,
+		'3': 3,
+		'4': 4,
+		'5': 5,
+		'6': 6,
+		'7': 7,
+		'8': 8,
+		'9': 9,
+	}
+)
+
+// todo: figure out the early exit path
+// probably something to do with characters at each.
 func findMax12(line string) int {
-	max := 0
+	if line == "" {
+		return 0
+	}
+
+	first12 := line[0:12]
+	num, err := strconv.Atoi(first12)
+	if err != nil {
+		panic(err)
+	}
+
+	max := num
 	root := lineToTree(line)
 	// now find the path with max value, using max 12 nodes..
 	var nodeMax func(*Node, int, int)
 	nodeMax = func(start *Node, currentValue, remainder int) {
+
+		shouldExit := func(a, b int) bool {
+			// figure out if a can ever be larger than b
+			// should take into account the remainder..
+
+			as := strconv.Itoa(a)[0 : 12-remainder]
+			bs := strconv.Itoa(b)[0 : 12-remainder]
+
+			for i := 0; i < len(as); i++ {
+				if speedyMap[as[i]] < speedyMap[bs[i]] {
+					return true
+				} else if speedyMap[as[i]] == speedyMap[bs[i]] {
+					continue
+				} else {
+					return false
+				}
+
+			}
+
+			return false
+		}
+
 		if start == nil {
 			return
 		}
@@ -69,6 +118,10 @@ func findMax12(line string) int {
 			return
 		}
 		nodeValue := start.Value * int(math.Pow(10., float64(remainder)))
+		if shouldExit(currentValue+nodeValue, max) {
+			//fmt.Printf("%v is smaller than %v with only %v remaining", currentValue, max, remainder)
+			return
+		}
 		// take each of the children
 		for _, child := range start.Children {
 			nodeMax(child, currentValue+nodeValue, remainder-1)
