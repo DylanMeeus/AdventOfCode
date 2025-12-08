@@ -1,26 +1,35 @@
 package main
 
 import (
+	"cmp"
 	"fmt"
 	"io/ioutil"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 func main() {
+	/*
+		n := lineToTree("1234", 0)
+		printTree(n, "")
+		fmt.Printf("%v\n", treeMap)
+		fmt.Printf("%v\n", treeMap[0])
+		fmt.Printf("%v\n", treeMap[0].Children[0])
+		fmt.Printf("%v\n", treeMap[1])
+		sorted := sortNodes(n.Children, 1)
+		for _, s := range sorted {
+			fmt.Println(s.Value)
+		}
+		return
+	*/
 	lines := readInput()
 	fmt.Println(solve1(lines))
-
-	f := (findMax12("987654321111111"))
-	fmt.Println(f)
-	fmt.Println(len(strconv.Itoa(f)))
-	f = (findMax12("234234234234278"))
-	fmt.Println(f)
-	fmt.Println(len(strconv.Itoa(f)))
-	//n := lineToTree("1234")
-	//printTree(n, "")
-	fmt.Println(solve2(lines))
+	fmt.Println("solving 2")
+	m := solve2(lines)
+	fmt.Println(len(strconv.Itoa(m)))
+	fmt.Println(m)
 }
 
 // find the max of 2 batteries combined
@@ -77,31 +86,28 @@ func findMax12(line string) int {
 	}
 
 	max := num
-	root := lineToTree(line)
+	treeMap = map[int]*Node{}
+	root := lineToTree(line, 0)
 	// now find the path with max value, using max 12 nodes..
-	var nodeMax func(*Node, int, int)
-	nodeMax = func(start *Node, currentValue, remainder int) {
+	shouldExit := func(a, b, remainder int) bool {
+		as := strconv.Itoa(a)[0 : 12-remainder]
+		bs := strconv.Itoa(b)[0 : 12-remainder]
 
-		shouldExit := func(a, b int) bool {
-			// figure out if a can ever be larger than b
-			// should take into account the remainder..
-
-			as := strconv.Itoa(a)[0 : 12-remainder]
-			bs := strconv.Itoa(b)[0 : 12-remainder]
-
-			for i := 0; i < len(as); i++ {
-				if speedyMap[as[i]] < speedyMap[bs[i]] {
-					return true
-				} else if speedyMap[as[i]] == speedyMap[bs[i]] {
-					continue
-				} else {
-					return false
-				}
-
+		for i := 0; i < len(as); i++ {
+			if speedyMap[as[i]] < speedyMap[bs[i]] {
+				return true
+			} else if speedyMap[as[i]] == speedyMap[bs[i]] {
+				continue
+			} else {
+				return false
 			}
 
-			return false
 		}
+
+		return false
+	}
+	var nodeMax func(*Node, int, int)
+	nodeMax = func(start *Node, currentValue, remainder int) {
 
 		if start == nil {
 			return
@@ -118,7 +124,7 @@ func findMax12(line string) int {
 			return
 		}
 		nodeValue := start.Value * int(math.Pow(10., float64(remainder)))
-		if shouldExit(currentValue+nodeValue, max) {
+		if shouldExit(currentValue+nodeValue, max, remainder) {
 			//fmt.Printf("%v is smaller than %v with only %v remaining", currentValue, max, remainder)
 			return
 		}
@@ -130,11 +136,17 @@ func findMax12(line string) int {
 			}
 		}
 	}
+
 	nodeMax(root, 0, 11)
 	return max
 }
 
-func lineToTree(line string) *Node {
+var (
+	// map an index to a node??
+	treeMap = map[int]*Node{}
+)
+
+func lineToTree(line string, idx int) *Node {
 	if line == "" {
 		return nil
 	}
@@ -142,11 +154,36 @@ func lineToTree(line string) *Node {
 	if err != nil {
 		panic(err)
 	}
-	node := &Node{Value: val, DepthRemaining: len(line) - 1}
-	for i := 1; i < len(line); i++ {
-		node.Children = append(node.Children, lineToTree(line[i:]))
+	var node *Node
+	if n, ok := treeMap[idx]; ok {
+		return n
 	}
+	node = &Node{Value: val, DepthRemaining: len(line) - 1}
+	if node.Children == nil || len(node.Children) == 0 {
+		for i := 1; i < len(line); i++ {
+			node.Children = append(node.Children, lineToTree(line[i:], idx+i))
+		}
+	}
+	treeMap[idx] = node
 	return node
+}
+
+func sortNodes(children []*Node, depth int) []*Node {
+	// sortNodes from best child to worst child (based on value and depth remaining)
+
+	out := []*Node{}
+
+	for _, child := range children {
+		if child.DepthRemaining >= depth {
+			out = append(out, child)
+		}
+	}
+
+	slices.SortFunc(out, func(i, j *Node) int {
+		return cmp.Compare(i.DepthRemaining, j.DepthRemaining)
+	})
+
+	return out
 }
 
 func solve1(lines []string) int {
@@ -167,13 +204,14 @@ func solve2(lines []string) int {
 		fmt.Printf("parsed %v of %v lines\n", i, len(lines))
 	}
 
-	return t
+	return 0
 }
 func readInput() []string {
 	b, err := ioutil.ReadFile("input.txt")
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("done")
 	return strings.Split(string(b), "\n")
 }
 
