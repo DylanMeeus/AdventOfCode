@@ -12,7 +12,8 @@ type Point struct {
 
 func main() {
 	m := toPointMap(readInput())
-	fmt.Println(solve1(m))
+	//fmt.Println(solve1(m))
+	fmt.Println(solve2(m))
 }
 
 func solve1(m map[Point]rune) int {
@@ -29,6 +30,33 @@ func solve1(m map[Point]rune) int {
 
 	return count
 
+}
+
+func solve2(m map[Point]rune) int {
+	// solve2 figures out how many roles of toilet paper we can remove
+
+	removed := 0
+	marked := []Point{}
+loop:
+	for key, val := range m {
+		if val == '@' {
+			c := countNeighbours(key, m)
+			if c < 4 {
+				marked = append(marked, key)
+			}
+		}
+	}
+	// wipe all of the ones found.
+	if len(marked) > 0 {
+		removed += len(marked)
+		for _, p := range marked {
+			m[p] = '.'
+		}
+		marked = []Point{}
+		goto loop
+	}
+
+	return removed
 }
 
 func countNeighbours(p Point, m map[Point]rune) int {
