@@ -20,6 +20,7 @@ func main() {
 	ri := readInput()
 	m, is := parse(ri)
 	fmt.Println(solve1(m, is))
+	fmt.Println(solve2(m))
 }
 
 func solve1(bs []Bounds, is []int) int {
@@ -45,6 +46,36 @@ outer:
 	}
 
 	return c
+}
+
+func solve2(bs []Bounds) int {
+	sort.Slice(bs, func(i, j int) bool {
+		return bs[i].start < bs[j].start
+	})
+
+	acc := 0
+
+	current_start := bs[0].start
+	current_end := bs[0].end
+	for _, b := range bs[1:] {
+
+		// figure out if we completed a chain..
+		if b.start <= current_end {
+			// extend the chain if the end is further out..
+			if b.end > current_end {
+				current_end = b.end
+			}
+		} else {
+			// we have a complete chain.. figure out it's length and add to acc
+			//fmt.Printf("start: %v, end %v\n", current_start, current_end)
+			acc += ((current_end - current_start) + 1)
+			current_start, current_end = b.start, b.end
+		}
+
+	}
+
+	// add the final chain and return acc
+	return acc + ((current_end - current_start) + 1)
 }
 
 func parse(lines []string) ([]Bounds, []int) {
