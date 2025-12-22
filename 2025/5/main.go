@@ -97,9 +97,6 @@ func parse(lines []string) ([]Bounds, []int) {
 			if err != nil {
 				panic(err)
 			}
-			//for i := li; i <= ri; i++ {
-			//m[i] = true
-			//}
 			bs = append(bs, Bounds{li, ri})
 		} else {
 			num, err := strconv.Atoi(line)
