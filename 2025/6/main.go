@@ -34,8 +34,8 @@ func (p *Problem) result() int {
 }
 
 func main() {
-	problems := parse(preprocess(readInput()))
-	fmt.Println(solve1(problems))
+	//fmt.Println(solve1(parse(preprocess(readInput()))))
+	fmt.Println(solve2(parse2(readInput())))
 }
 
 func solve1(problems iter.Seq[*Problem]) int {
@@ -46,6 +46,77 @@ func solve1(problems iter.Seq[*Problem]) int {
 	return c
 }
 
+func solve2(ps []Problem) int {
+	c := 0
+	for _, p := range ps {
+		if len(p.values) == 0 {
+			continue
+		}
+		c += p.result()
+	}
+	return c
+}
+
+// parser for the second problem
+func parse2(lines []string) []Problem {
+	max := 0
+
+	ps := []Problem{}
+
+	rowmaps := []map[int]string{}
+	for _, line := range lines {
+		if len(line) > max {
+			max = len(line)
+		}
+		rowmap := map[int]string{}
+		for i, char := range line {
+			rowmap[i] = string(char)
+		}
+		rowmaps = append(rowmaps, rowmap)
+	}
+
+	lastOperator := ""
+	numbers := []string{}
+	for i := 0; i < max; i++ {
+		num := ""
+		for _, row := range rowmaps {
+			// now we have a full number or a list of spaces..
+			char := row[i]
+			if char == "+" || char == "*" {
+				lastOperator = char
+			} else {
+				if char != " " {
+					num += row[i]
+				}
+			}
+		}
+		if num == "" {
+			p := Problem{values: mapToInt(numbers), operator: lastOperator}
+			ps = append(ps, p)
+			numbers = []string{}
+		} else {
+			numbers = append(numbers, num)
+		}
+		//fmt.Println(num)
+	}
+	// add last in buffer
+	ps = append(ps, Problem{values: mapToInt(numbers), operator: lastOperator})
+	return ps
+}
+
+func mapToInt(ss []string) []int {
+	out := make([]int, len(ss))
+
+	for j, s := range ss {
+		i, err := strconv.Atoi(s)
+		if err != nil {
+			panic(err)
+		}
+		out[j] = i
+	}
+
+	return out
+}
 func parse(lines []string) iter.Seq[*Problem] {
 	m := map[int]*Problem{}
 	for linecount, line := range lines {
