@@ -19,7 +19,45 @@ func main() {
 	lines := readInput()
 	g := len(lines) // length of grid to know when to stop scanning
 	s, m := parse(lines)
-	fmt.Println(solve1(s, m, g))
+	//fmt.Println(solve1(s, m, g))
+	fmt.Println(solve2(s, m, g))
+}
+
+func solve2(start Point, m map[Point]rune, g int) int {
+	// the splitters we have hit
+
+	// at this point you do need memoization
+
+	// memoize the 'worlds' after each point
+	memo := map[Point]int{}
+
+	beam := Beam{location: start, alive: true}
+
+	var traverse func(Beam, int) int
+	traverse = func(b Beam, current int) int {
+		// else we update the location
+		for m[b.location] != '^' {
+			b.location.row++
+			if b.location.row > g {
+				return current
+			}
+		}
+		if val, ok := memo[b.location]; ok {
+			return val
+		}
+		if m[b.location] == '^' {
+			current++
+			current += traverse(Beam{location: Point{b.location.row, b.location.col - 1}}, 0)
+			current += traverse(Beam{location: Point{b.location.row, b.location.col + 1}}, 0)
+			memo[b.location] = current
+		}
+		return current
+	}
+
+	res := traverse(beam, 1)
+
+	return res
+
 }
 
 func solve1(start Point, m map[Point]rune, g int) int {
@@ -90,7 +128,7 @@ func parse(lines []string) (Point, map[Point]rune) {
 }
 
 func readInput() []string {
-	b, err := ioutil.ReadFile("test_input.txt")
+	b, err := ioutil.ReadFile("input.txt")
 	if err != nil {
 		panic(err)
 	}
