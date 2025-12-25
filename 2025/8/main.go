@@ -82,6 +82,7 @@ func distance(b1, b2 Box) int {
 func main() {
 	bs := parse(readInput())
 	fmt.Println(solve1(bs))
+	fmt.Println(solve2(bs))
 }
 
 func findClosest(b Box, bs []Box) Box {
@@ -154,17 +155,12 @@ func solve1(bs []Box) int {
 
 	sort.Slice(pairs, func(i, j int) bool { return pairs[i].dist <= pairs[j].dist })
 
-	for i := 0; i < 11; i++ {
-		fmt.Println(i, pairs[i])
-	}
-
 	// sorted pairs, turn these into nodes??
 	chains := []*Node{}
 
 	taken := 0
 
-	for taken < 1000 {
-		fmt.Println(taken)
+	for taken < 10 {
 		top := pairs[0]
 
 		a, b := top.b1, top.b2
@@ -260,4 +256,120 @@ func readInput() []string {
 		panic(err)
 	}
 	return strings.Split(string(b), "\n")
+}
+
+func solve2(bs []Box) int {
+	// create pairs of all boxes, with their distances, and then sort those by length..
+	pairs := []Pair{}
+	pairMap := map[Pair]bool{}
+
+	contains := func(needle Pair, ps []Pair) bool {
+		for _, p := range ps {
+			if p.equal(needle) {
+				return true
+			}
+		}
+		return false
+	}
+	_ = contains
+	for _, box := range bs {
+		for _, box2 := range bs {
+			if box == box2 {
+				continue
+			}
+			var pair Pair
+			if box.x < box2.x {
+				pair = Pair{box, box2, distance(box, box2)}
+			} else {
+				pair = Pair{box2, box, distance(box, box2)}
+			}
+			if _, ok := pairMap[pair]; ok {
+				//fmt.Printf("map contains %v\n", pair)
+			} else {
+				pairs = append(pairs, pair)
+			}
+			pairMap[pair] = true
+		}
+	}
+
+	sort.Slice(pairs, func(i, j int) bool { return pairs[i].dist <= pairs[j].dist })
+	// sorted pairs, turn these into nodes??
+	chains := []*Node{}
+
+	for {
+		top := pairs[0]
+
+		a, b := top.b1, top.b2
+
+		var firstChain, secondChain *Node
+
+		for _, chain := range chains {
+			if containsBox(a, chain) {
+				firstChain = chain
+			}
+			if containsBox(b, chain) {
+				secondChain = chain
+			}
+		}
+
+		// if both are nil, we create a new chain
+		if firstChain == nil && secondChain == nil {
+			newChain := &Node{
+				value: a,
+				next: &Node{
+					value: b,
+					next:  nil,
+				},
+			}
+			chains = append(chains, newChain)
+		}
+
+		if firstChain != nil && secondChain == nil {
+			// we found a chain for A, but not for B
+			addTail(firstChain, b)
+			if firstChain.Len() == len(bs) {
+				// we have a full match
+				return a.x * b.x
+			}
+		}
+
+		if firstChain == nil && secondChain != nil {
+			// we found a chain for B but not for A
+			addTail(secondChain, a)
+			if secondChain.Len() == len(bs) {
+				// we have a full match
+				return a.x * b.x
+			}
+		}
+
+		if firstChain != nil && secondChain != nil {
+			// we only need to connect them if they are not the same chain..
+
+			if firstChain.value != secondChain.value {
+				// figure out when the last chain is merged
+				addTailNode(firstChain, secondChain)
+				newChains := []*Node{}
+				for _, c := range chains {
+					if c.value != secondChain.value {
+						newChains = append(newChains, c)
+					}
+				}
+				chains = newChains
+				if firstChain.Len() == len(bs) {
+					// we have a full match
+					return a.x * b.x
+				}
+			} else {
+				// already in same chain, so it's a no-op
+				//fmt.Printf("%v in chain %v\n", firstChain, secondChain)
+			}
+		}
+
+		pairs = pairs[1:]
+	}
+
+	sort.Slice(chains, func(i, j int) bool { return chains[i].Len() > chains[j].Len() })
+
+	return chains[0].Len() * chains[1].Len() * chains[2].Len()
+
 }
