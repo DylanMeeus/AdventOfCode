@@ -14,8 +14,62 @@ type Box struct {
 }
 
 type Node struct {
-	start, end *Node
-	value      Box
+	value Box
+	next  *Node
+}
+
+func (n *Node) Print() {
+	s := n
+	for s != nil {
+		fmt.Printf(" %v -", s.value)
+		s = s.next
+	}
+	fmt.Println()
+}
+
+func (n *Node) Len() int {
+	i := 0
+	s := n
+	for s != nil {
+		i++
+		s = s.next
+	}
+	return i
+}
+
+func addTail(n *Node, b Box) {
+	node := n
+
+	for node.next != nil {
+		node = node.next
+	}
+	// now we found the last node
+	node.next = &Node{
+		value: b,
+	}
+
+}
+
+func addTailNode(n, t *Node) {
+	node := n
+
+	for node.next != nil {
+		node = node.next
+	}
+	// now we found the last node
+	node.next = t
+
+}
+
+func containsBox(b Box, n *Node) bool {
+	node := n
+	for node != nil {
+		if node.value == b {
+			return true
+		}
+		node = node.next
+	}
+	return false
 }
 
 func distance(b1, b2 Box) int {
@@ -89,56 +143,84 @@ func solve1(bs []Box) int {
 
 	sort.Slice(pairs, func(i, j int) bool { return pairs[i].dist <= pairs[j].dist })
 
-	boxesContain := func(b Box, bs []Box) bool {
-		for _, x := range bs {
-			if x == b {
-				return true
-			}
-		}
-		return false
+	for i := 0; i < 11; i++ {
+		fmt.Println(i, pairs[i])
 	}
 
-	chains := [][]Box{}
+	// sorted pairs, turn these into nodes??
+	chains := []*Node{}
+
 	taken := 0
 
-outer:
-	for taken != 10 {
+	for taken < 1000 {
+		fmt.Println(taken)
 		top := pairs[0]
 
-		//fmt.Printf("(%v - %v) %v\n", top.b1, top.b2, top.dist)
-		// connect them, bit figure out if either b1 or b2 already appears in a chain..
+		a, b := top.b1, top.b2
 
-		added := false
+		var firstChain, secondChain *Node
 
-		for i, chain := range chains {
-			if boxesContain(top.b1, chain) && boxesContain(top.b2, chain) {
-				pairs = pairs[1:]
-				continue outer
+		for _, chain := range chains {
+			if containsBox(a, chain) {
+				firstChain = chain
 			}
-			if boxesContain(top.b1, chain) && !boxesContain(top.b2, chain) {
-				taken++
-				chains[i] = append(chain, top.b2)
-				added = true
-			}
-			if boxesContain(top.b2, chain) && !boxesContain(top.b1, chain) {
-				taken++
-				chains[i] = append(chain, top.b1)
-				added = true
+			if containsBox(b, chain) {
+				secondChain = chain
 			}
 		}
 
-		if !added {
-			chains = append(chains, []Box{top.b1, top.b2})
+		// if both are nil, we create a new chain
+		if firstChain == nil && secondChain == nil {
+			newChain := &Node{
+				value: a,
+				next: &Node{
+					value: b,
+					next:  nil,
+				},
+			}
+			chains = append(chains, newChain)
 			taken++
 		}
+
+		if firstChain != nil && secondChain == nil {
+			// we found a chain for A, but not for B
+			addTail(firstChain, b)
+			taken++
+		}
+
+		if firstChain == nil && secondChain != nil {
+			// we found a chain for B but not for A
+			addTail(secondChain, a)
+			taken++
+		}
+
+		if firstChain != nil && secondChain != nil {
+			// we only need to connect them if they are not the same chain..
+
+			if firstChain.value != secondChain.value {
+				addTailNode(firstChain, secondChain)
+				newChains := []*Node{}
+				for _, c := range chains {
+					if c.value != secondChain.value {
+						newChains = append(newChains, c)
+					}
+				}
+				chains = newChains
+				taken++
+			} else {
+				// already in same chain, so it's a no-op
+				//fmt.Printf("%v in chain %v\n", firstChain, secondChain)
+				taken++
+			}
+		}
+
 		pairs = pairs[1:]
 	}
 
-	for _, chain := range chains {
-		fmt.Printf("%v\n", len(chain))
-	}
+	sort.Slice(chains, func(i, j int) bool { return chains[i].Len() > chains[j].Len() })
 
-	return 0
+	return chains[0].Len() * chains[1].Len() * chains[2].Len()
+
 }
 
 func parse(lines []string) []Box {
@@ -162,7 +244,7 @@ func parse(lines []string) []Box {
 }
 
 func readInput() []string {
-	b, err := ioutil.ReadFile("test_input.txt")
+	b, err := ioutil.ReadFile("input.txt")
 	if err != nil {
 		panic(err)
 	}
