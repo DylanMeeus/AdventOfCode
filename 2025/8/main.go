@@ -121,6 +121,8 @@ func (p Pair) equal(other Pair) bool {
 func solve1(bs []Box) int {
 	// create pairs of all boxes, with their distances, and then sort those by length..
 	pairs := []Pair{}
+	pairMap := map[Pair]bool{}
+
 	contains := func(needle Pair, ps []Pair) bool {
 		for _, p := range ps {
 			if p.equal(needle) {
@@ -129,15 +131,24 @@ func solve1(bs []Box) int {
 		}
 		return false
 	}
+	_ = contains
 	for _, box := range bs {
 		for _, box2 := range bs {
 			if box == box2 {
 				continue
 			}
-			pair := Pair{box, box2, distance(box, box2)}
-			if !contains(pair, pairs) {
+			var pair Pair
+			if box.x < box2.x {
+				pair = Pair{box, box2, distance(box, box2)}
+			} else {
+				pair = Pair{box2, box, distance(box, box2)}
+			}
+			if _, ok := pairMap[pair]; ok {
+				//fmt.Printf("map contains %v\n", pair)
+			} else {
 				pairs = append(pairs, pair)
 			}
+			pairMap[pair] = true
 		}
 	}
 
