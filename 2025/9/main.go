@@ -115,8 +115,6 @@ func inBoundary(p Point, m map[Point]bool) bool {
 		return true
 	}
 
-	// shoot north
-
 	if val, ok := memo[p]; ok {
 		return val
 	}
@@ -132,7 +130,8 @@ func inBoundary(p Point, m map[Point]bool) bool {
 	for i := 0; i < WINDOW; i++ {
 		newPoint := Point{row: start, col: p.col}
 		encountered = append(encountered, newPoint)
-		if m[newPoint] {
+		lookAhead := Point{row: start - 1, col: p.col}
+		if m[newPoint] && !m[lookAhead] {
 			intersectsNorth++
 		}
 		start--
@@ -149,46 +148,8 @@ func inBoundary(p Point, m map[Point]bool) bool {
 	for _, enc := range encountered {
 		memo[enc] = true
 	}
+	encountered = nil
 	return true
-
-	start = p.row
-	intersectsSouth := 0
-	for i := 0; i < WINDOW; i++ {
-		newPoint := Point{row: start, col: p.col}
-		if m[newPoint] {
-			intersectsSouth++
-		}
-		start++
-	}
-	if intersectsSouth == 0 {
-		return false
-	}
-
-	start = p.col
-	intersectsEast := 0
-
-	for i := 0; i < WINDOW; i++ {
-		newPoint := Point{row: p.row, col: start}
-		if m[newPoint] {
-			intersectsEast++
-		}
-		start++
-	}
-	if intersectsEast == 0 {
-		return false
-	}
-
-	start = p.col
-	intersectsWest := 0
-
-	for i := 0; i < WINDOW; i++ {
-		newPoint := Point{row: p.row, col: start}
-		if m[newPoint] {
-			intersectsWest++
-		}
-		start--
-	}
-	return intersectsNorth%2 == 1 || intersectsSouth%2 == 1 || intersectsWest%2 == 1 || intersectsEast%2 == 1
 }
 
 type Pair struct {
@@ -207,6 +168,11 @@ func sortedPairs(points []Point) []Pair {
 	sort.Slice(pairs, func(i, j int) bool { return area(pairs[i].a, pairs[i].b) >= area(pairs[j].a, pairs[j].b) })
 
 	return pairs
+}
+
+// floodFill the entire rectangle so it's easier to do a 'contain' check
+func floodFill(ps []Point) map[Point]bool {
+	return nil
 }
 
 func solve2(points []Point) int {
@@ -230,17 +196,14 @@ func solve2(points []Point) int {
 	containsAll := func(p1, p2, p3, p4 Point) bool {
 		return inBoundary(p1, borderMap) && inBoundary(p2, borderMap) && inBoundary(p3, borderMap) && inBoundary(p4, borderMap)
 	}
-	_ = containsAll
 
 	// now we need to select 2 points that do not paint outside this figure
 
 	pairs := sortedPairs(points)
 
-	// find the first valid pair..
-
-	LENGTH := len(pairs[225330:])
+	LENGTH := len(pairs)
 outer:
-	for i, pair := range pairs[225330:] {
+	for i, pair := range pairs {
 		fmt.Printf("checking pair %v of %v\n", i, LENGTH)
 		point := pair.a
 		other := pair.b
@@ -258,24 +221,8 @@ outer:
 
 		var x, y Point
 
-		if point.row > other.row && point.col < other.col {
-			x = Point{row: other.row, col: point.col}
-			y = Point{row: point.row, col: other.col}
-		}
-
-		if point.row > other.row && point.col > other.col {
-			x = Point{row: other.row, col: point.col}
-			y = Point{row: point.row, col: other.col}
-		}
-
-		if point.row < other.row && point.col > other.col {
-			x = Point{row: other.row, col: point.col}
-			y = Point{row: point.row, col: other.col}
-		}
-		if point.row < other.row && point.col < other.col {
-			x = Point{row: other.row, col: point.col}
-			y = Point{row: point.row, col: other.col}
-		}
+		x = Point{row: other.row, col: point.col}
+		y = Point{row: point.row, col: other.col}
 
 		lines := []Point{point, x, other, y, point}
 		rect := []Point{}
@@ -289,7 +236,6 @@ outer:
 		}
 
 		a := area(point, other)
-		//fmt.Printf("a=%v for %v %v %v %v\n", a, point, other, x, y)
 		valid := true
 		for _, l := range rect {
 			if !inBoundary(l, borderMap) {
@@ -299,6 +245,7 @@ outer:
 		}
 
 		if valid {
+			// return the first valid area
 			return a
 		}
 	}
