@@ -20,16 +20,24 @@ type Point struct {
 func main() {
 	ps := parse(readInput())
 	//fmt.Println(solve1(ps))
-	northMostVal(ps)
+	NORTHMOST = northMostVal(ps)
 	fmt.Println(solve2(ps))
 }
 
 func area(p1, p2 Point) int {
 
-	Lf := float64((p1.row - p2.row) + 1)
-	Hf := float64(p1.col-p2.col) + 1
-	H := int(math.Abs(Lf))
-	L := int(math.Abs(Hf))
+	Lf := float64((p1.row - p2.row))
+	Hf := float64(p1.col - p2.col)
+	H := int(math.Abs(Lf)) + 1
+	L := int(math.Abs(Hf)) + 1
+
+	if p1.row == p2.row {
+		return int(float64(math.Abs(Hf)))
+	}
+
+	if p1.col == p2.col {
+		return int(float64(math.Abs(Lf)))
+	}
 
 	return H * L
 }
@@ -59,28 +67,27 @@ func drawLine(p1, p2 Point) []Point {
 	if p1.row == p2.row {
 		// do we move up or down?
 		if p1.col <= p2.col {
-			for i := p1.col; i < p2.col; i++ {
+			for i := p1.col; i <= p2.col; i++ {
 				out = append(out, Point{p1.row, i})
 			}
 		}
 		if p1.col > p2.col {
-			for i := p1.col; i > p2.col; i-- {
+			for i := p1.col; i >= p2.col; i-- {
 				out = append(out, Point{p1.row, i})
 			}
 		}
 	} else if p1.col == p2.col {
 		if p1.row <= p2.row {
-			for i := p1.row; i < p2.row; i++ {
+			for i := p1.row; i <= p2.row; i++ {
 				out = append(out, Point{i, p1.col})
 			}
 		}
 		if p1.row > p2.row {
-			for i := p1.row; i > p2.row; i-- {
+			for i := p1.row; i >= p2.row; i-- {
 				out = append(out, Point{i, p1.col})
 			}
 		}
 	} else {
-		fmt.Printf("%v %v\n", p1, p2)
 		panic("This should not happen yo")
 	}
 	return out
@@ -107,7 +114,33 @@ func northMostVal(ps []Point) int {
 	return row
 }
 
-func inBoundary(p Point, m map[Point]bool) bool {
+func inBoundary(p Point, m map[Point]bool, edges []Point) bool {
+	if m[p] {
+		return true
+	}
+
+	hits := 0
+	for i := 0; i < len(edges)-1; i++ {
+		a, b := edges[i], edges[i+1]
+		if a.col == b.col {
+			continue
+		}
+		if a.row != b.row {
+			continue
+		}
+		if (p.col >= a.col && p.col < b.col) || (p.col >= b.col && p.col < a.col) {
+			if p.row > a.row {
+				hits++
+			}
+		}
+	}
+	if hits == 0 {
+		return false
+	}
+	return hits%2 == 1
+}
+
+func inBoundary2(p Point, m map[Point]bool) bool {
 	WINDOW := 10000
 	// it's in the figure if in each direction it only intersects _ONE_ boundary
 
@@ -140,14 +173,13 @@ func inBoundary(p Point, m map[Point]bool) bool {
 		}
 	}
 	if intersectsNorth == 0 || intersectsNorth%2 == 0 {
-		for _, enc := range encountered {
-			memo[enc] = false
-		}
 		return false
 	}
-	for _, enc := range encountered {
-		memo[enc] = true
-	}
+	/*
+		for _, enc := range encountered {
+			memo[enc] = true
+		}
+	*/
 	encountered = nil
 	return true
 }
@@ -170,11 +202,6 @@ func sortedPairs(points []Point) []Pair {
 	return pairs
 }
 
-// floodFill the entire rectangle so it's easier to do a 'contain' check
-func floodFill(ps []Point) map[Point]bool {
-	return nil
-}
-
 func solve2(points []Point) int {
 	// draw a polygon essentially
 	// then 'solve1' with points that are enclosed within this shape..
@@ -189,12 +216,11 @@ func solve2(points []Point) int {
 		newPoints := drawLine(current, next)
 		border = append(border, newPoints...)
 	}
-	//draw(border)
 
 	borderMap := toMap(border)
 
 	containsAll := func(p1, p2, p3, p4 Point) bool {
-		return inBoundary(p1, borderMap) && inBoundary(p2, borderMap) && inBoundary(p3, borderMap) && inBoundary(p4, borderMap)
+		return inBoundary(p1, borderMap, points) && inBoundary(p2, borderMap, points) && inBoundary(p3, borderMap, points) && inBoundary(p4, borderMap, points)
 	}
 
 	// now we need to select 2 points that do not paint outside this figure
@@ -211,11 +237,11 @@ outer:
 			continue
 		}
 		// the points need to be on a diagonal
-		if point.row == other.row || point.col == other.col {
-			continue
-		}
-
-		// we need to create 2 points to close the loop
+		/*
+			if point.row == other.row || point.col == other.col {
+				continue
+			}
+		*/
 
 		// figure out the correct bounding box
 
@@ -238,7 +264,7 @@ outer:
 		a := area(point, other)
 		valid := true
 		for _, l := range rect {
-			if !inBoundary(l, borderMap) {
+			if !inBoundary(l, borderMap, points) {
 				valid = false
 				continue outer
 			}
@@ -246,6 +272,7 @@ outer:
 
 		if valid {
 			// return the first valid area
+			fmt.Printf("area %v for points %v %v\n", a, point, other)
 			return a
 		}
 	}
@@ -291,8 +318,8 @@ func draw(ps []Point) {
 		m[p] = true
 	}
 
-	for row := 0; row < 13; row++ {
-		for col := 0; col < 13; col++ {
+	for row := 0; row < 1000000; row++ {
+		for col := 0; col < 1000000; col++ {
 			if _, ok := m[Point{row, col}]; ok {
 				fmt.Print("#")
 			} else {
